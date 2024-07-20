@@ -25,5 +25,4 @@ class Game:
             self.clock.tick(60)
             pygame.display.update()
 
-
 Game().run()
