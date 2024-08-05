@@ -23,9 +23,11 @@ class Player():
 
         if self.mouse_pressed != pygame.mouse.get_pressed():
             self.mouse_pressed = pygame.mouse.get_pressed()
+            
             if self.mouse_pressed[0]:
-                for i in range(2):
-                    self.speed[i -1] = self.speed[i -1] * -1
+                    self.speed[0] = self.speed[0] * -1
+            if self.mouse_pressed[2]:
+                self.speed[1] = self.speed[1] * -1
         else: pass
 
     def aply_mov(self):
