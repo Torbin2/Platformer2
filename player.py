@@ -3,7 +3,7 @@ import pygame
 class Player():
 
     def __init__(self, screen):
-        self.rect = pygame.Rect(0, 0, 100, 100)
+        self.rect = pygame.Rect(1600, 1000, 100, 100)
         self.speed = [0,0]
         self.screen = screen
 
@@ -18,7 +18,7 @@ class Player():
         if keys[pygame.K_d]:
             if self.speed[0] < 60: self.speed[0] += 4
         if keys[pygame.K_SPACE] and self.grounded:
-            self.speed[1] -= 120
+            self.speed[1] -= 90
             self.grounded = False
 
         if self.mouse_pressed != pygame.mouse.get_pressed():
@@ -30,28 +30,46 @@ class Player():
                 self.speed[1] = self.speed[1] * -1
         else: pass
 
-    def aply_mov(self):
+    def apply_mov(self, blocks):
         # left & right
         self.rect.centerx += self.speed[0]
+        
+        for i in blocks:
+            if self.rect.colliderect(blocks[i].rect):
+                if self.speed[0] > 0: 
+                    self.rect.right = blocks[i].rect.left
+                    self.speed[0] -= 8
+                elif self.speed[0] < 0: 
+                    self.rect.left = blocks[i].rect.right
+                    self.speed[0] += 8
 
         if self.speed[0] > 0: self.speed[0] -= 2
         elif self.speed[0] < 0: self.speed[0] += 2
 
         # gravity
 
-
-        if self.rect.bottom > 2000:
-            self.rect.bottom = 2000
-            self.speed[1] = 0
-            self.grounded = True
         if not self.grounded:
-            self.speed[1] += 6
+            if self.speed[1] <= 300: self.speed[1] += 3
             self.rect.y += self.speed[1]
+
+        for i in blocks:
+            if self.rect.colliderect(blocks[i].rect):
+                if self.speed[1] > 0: 
+                    self.rect.bottom = blocks[i].rect.top
+                    self.speed[1] = 0
+                    self.grounded = True
+                elif self.speed[1] < 0: 
+                    self.rect.top = blocks[i].rect.bottom
+                    self.speed[1] += 12
+            
+            
+
+        
 
     def draw(self):
         pygame.draw.rect(self.screen, 'white', self.rect)
 
-    def update(self):
+    def update(self, blocks):
         self.input()
-        self.aply_mov()
+        self.apply_mov(blocks)
         self.draw()

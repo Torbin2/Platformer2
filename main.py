@@ -1,5 +1,6 @@
 import pygame
 from player import Player
+from blocks import Blocks
 
 pygame.init()
 
@@ -10,7 +11,9 @@ class Game:
         self.screen = pygame.display.set_mode((3800, 2000), pygame.RESIZABLE)
         pygame.display.set_caption('game')
         self.clock = pygame.time.Clock()
+
         self.player = Player(self.screen)
+        self.blocks = Blocks(self.screen)
 
     def run(self):
         while True:
@@ -20,7 +23,9 @@ class Game:
                     exit()
 
             self.screen.fill("black")
-            self.player.update()
+
+            self.blocks.render()
+            self.player.update(self.blocks.blocks)
 
             self.clock.tick(60)
             pygame.display.update()
