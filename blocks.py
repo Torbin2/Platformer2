@@ -22,6 +22,6 @@ class Blocks:
 
 class Block:
     def __init__(self, x, y):
-        self.rect = pygame.Rect(x*300, y*300, 300, 300)
+        self.rect = pygame.Rect(x*100, y*100, 100, 100)
 
     
