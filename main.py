@@ -19,11 +19,11 @@ class Game:
         self.blocks = Blocks(self.screen)
 
     def run(self):
-        # while True:
-        #     for event in pygame.event.get():
-        #         if event.type == pygame.QUIT:
-        #             pygame.quit()
-        #             exit()
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
 
             self.screen.fill("black")
 
@@ -34,7 +34,7 @@ class Game:
             pygame.display.update()
 
             
-while open_menu:
-    open_menu = menu.main()
 
+open_menu = menu.main()
+    
 Game().run()
