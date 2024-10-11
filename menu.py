@@ -8,7 +8,6 @@ class Menu:
         self.font = pygame.font.Font(pygame.font.get_default_font(), 50)
         self.colors = ["#041413", "#25BEB3", "#146963"]
         
-        self.close = False
 
         self.options = {"start" : 25,
                         "options" : 50,
@@ -40,6 +39,18 @@ class Menu:
                     elif event.key==pygame.K_s:
                         if self.selected != len(self.options):
                             self.selected += 1
+
+                    elif event.key == pygame.K_RETURN:
+                        match self.selected:
+                            case 0:
+                                return
+                            case 1: pass
+                            case 2:
+                                pygame.quit()
+                                exit()
+                                
+
+                            
             self.screen.fill(self.colors[0])
 
             self.render()
@@ -47,7 +58,6 @@ class Menu:
             self.clock.tick(60)
             pygame.display.update()
             
-            if self.close == True:
-                return False
+
 
 
