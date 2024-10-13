@@ -10,8 +10,7 @@ menu = Menu()
 class Game:
     def __init__(self):
 
-        #self.screen = pygame.display.set_mode((3800, 2000), pygame.RESIZABLE)
-        self.screen = pygame.display.set_mode((3800, 2000))
+        self.screen = pygame.display.set_mode((3800, 2000), pygame.RESIZABLE)
         pygame.display.set_caption('game')
         self.clock = pygame.time.Clock()
         
@@ -26,10 +25,6 @@ class Game:
                     pygame.quit()
                     exit()
 
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        menu.main()
-
             self.screen.fill("black")
 
             self.blocks.render()
@@ -39,6 +34,7 @@ class Game:
             pygame.display.update()
 
             
-menu.main()
+
+setings = menu.main()
     
 Game().run()
