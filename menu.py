@@ -3,6 +3,7 @@ import json
 
 class Menu:
     def __init__(self):
+
         with open("settings.json", "r") as f:
             self.settings = json.load(f)
         

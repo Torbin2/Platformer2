@@ -10,13 +10,24 @@ menu = Menu()
 class Game:
     def __init__(self):
 
-        self.screen = pygame.display.set_mode((3800, 2000), pygame.RESIZABLE)
+
+        self.apply_setting()
+
+
         pygame.display.set_caption('game')
         self.clock = pygame.time.Clock()
         
+    def apply_setting(self):
+        self.settings = menu.main()
 
-        self.player = Player(self.screen)
-        self.blocks = Blocks(self.screen)
+        self.scale = self.settings["window_size"]
+        self.screen = pygame.display.set_mode((400 * self.scale, 300* self.scale))
+        self.fps = 60 + (60 * self.settings["high_fps"])
+        print(self.fps)
+
+        self.player = Player(self.screen, self.scale)
+        self.blocks = Blocks(self.screen, self.scale)
+        
 
     def run(self):
         while True:
@@ -30,11 +41,12 @@ class Game:
             self.blocks.render()
             self.player.update(self.blocks.blocks)
 
-            self.clock.tick(60)
+            self.clock.tick(self.fps)
             pygame.display.update()
 
-            
+    
+        
 
-setings = menu.main()
+
     
 Game().run()
