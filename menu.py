@@ -9,19 +9,19 @@ class Menu:
         
         self.scale = self.settings["window_size"]
 
-        self.screen = pygame.display.set_mode((400 * self.scale, 300* self.scale))
+        self.screen = pygame.display.set_mode((480 * self.scale, 270* self.scale))
         pygame.display.set_caption('game')
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.Font(pygame.font.get_default_font(), 20* self.scale)
+        self.font = pygame.font.Font(pygame.font.get_default_font(), 15* self.scale)
         self.colors = ["#041413", "#25BEB3", "#146963"]
 
         self.viewing = "main"
         self.selected = 0
         
 
-        self.options = {"start" : 75,
-                        "options" : 140,
-                        "quit" : 180 }
+        self.options = {"start" : 30,
+                        "options" : 70,
+                        "quit" : 100 }
         
 
 
@@ -31,7 +31,7 @@ class Menu:
                 if num == self.selected: fill = self.colors[1]
                 else: fill = self.colors[2]
                 text = self.font.render(key, 1, (fill))
-                rect = text.get_rect(midtop = (200* self.scale, self.options[key] * self.scale))
+                rect = text.get_rect(midtop = (self.screen.get_width() / 2, self.options[key] * self.scale))
 
                 self.screen.blit(text, rect)    
         
@@ -51,8 +51,8 @@ class Menu:
 
     def apply_setting(self):#scuffed
         self.scale = self.settings["window_size"]
-        self.screen = pygame.display.set_mode((400 * self.scale, 300* self.scale))
-        self.font = pygame.font.Font(pygame.font.get_default_font(), 20* self.scale)
+        self.screen = pygame.display.set_mode((480 * self.scale, 270* self.scale))
+        self.font = pygame.font.Font(pygame.font.get_default_font(), 15* self.scale)
 
     def main(self):
         while True:

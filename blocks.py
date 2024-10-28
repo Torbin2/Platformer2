@@ -4,7 +4,7 @@ class Blocks:
 
     def __init__(self, screen, scale):
         
-        global sc #how better?
+        global sc
         sc = scale
         
         self.screen = screen
@@ -15,13 +15,15 @@ class Blocks:
         #     self.blocks[10, x] = Block(10, x)
 
 
-        for x in range(20):
-            self.blocks[x-3, 9] = Block(x-3, 9)
+        for x in range(90):
+            #screen is (45, 27)
+            self.blocks[x, 0] = Block(x, 0)
             self.blocks[0, x] = Block(0, x)
-            self.blocks[13, x] = Block(13, x)
+            self.blocks[x, 26] = Block(x, 26)
+            self.blocks[44, x] = Block(44, x)
         
-        self.blocks[0] = Block(6, 5)
-        self.blocks[1] = Block(7, 5)
+        self.blocks[0] = Block(20, 15)
+        self.blocks[1] = Block(21, 15)
     
     def render(self):
         for block in self.blocks:
@@ -30,6 +32,7 @@ class Blocks:
 
 class Block:
     def __init__(self, x, y):
-        self.rect = pygame.Rect(x *30*sc, y *30*sc, 30 *sc, 30 *sc)
+        self.rect = pygame.Rect(x *10*sc, y *10*sc, 10 *sc, 10 *sc)
+        self.type = "block"
 
     

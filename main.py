@@ -21,7 +21,7 @@ class Game:
         self.settings = menu.main()
 
         self.scale = self.settings["window_size"]
-        self.screen = pygame.display.set_mode((400 * self.scale, 300* self.scale))
+        self.screen = pygame.display.set_mode((480 * self.scale, 270* self.scale)) #16:9 ratio
         self.fps = 60 + (60 * self.settings["high_fps"])
         print(self.fps)
 
