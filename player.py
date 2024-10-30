@@ -10,6 +10,7 @@ class Player():
         self.screen = screen
 
         self.ground_timer = 0 #cyote_time
+        self.dash_cooldown = 0
         self.mouse_pressed = [False, False, False]
 
         self.gravity = 1 #1 is down, 0 is up
@@ -31,13 +32,40 @@ class Player():
         #     self.input_timer +=1
         #     if self.input_timer >= 30:
         #         self.input_block = False
+        dash_direction = [False, False]
 
+        if keys[pygame.K_w]:
+            dash_direction[1] = 1
+        elif keys[pygame.K_s]:
+            dash_direction[1] = -1
+        
         if keys[pygame.K_a]:
-            if self.speed[0] > -9.9:
+            if self.speed[0] > -10:
                 self.speed[0] -= 1.9
-        if keys[pygame.K_d] :
-            if self.speed[0] < 9.9:
+            dash_direction[0] = -1
+        elif keys[pygame.K_d] :
+            if self.speed[0] < 10:
                 self.speed[0] += 1.9
+            dash_direction[0] = 1
+
+        if keys[pygame.K_LSHIFT] and self.dash_cooldown < 0:
+            global pre_dash_speed
+            pre_dash_speed = self.speed
+            
+            self.dash_cooldown = 20
+            if dash_direction[0] and dash_direction[1]: dash_speed = 13
+            else: dash_speed = 25
+
+            self.speed[1] -= dash_speed * dash_direction[1]
+            self.speed[0] += dash_speed * dash_direction[0]
+
+            print(dash_direction, dash_speed, self.speed[1])
+        self.dash_cooldown -= 1
+        if self.dash_cooldown == 5:
+            self.speed = pre_dash_speed
+
+
+
 
         if self.state == "grounded":
             self.ground_timer = 7 #cyote_time
@@ -47,9 +75,8 @@ class Player():
                 if self.gravity == 1:
                     self.speed[1] = -13
                 else: self.speed[1] = +13
-                self.ground_timer = 0
-            
-        if self.ground_timer > 0: self.ground_timer -= 1
+                self.ground_timer = 0    
+        self.ground_timer -= 1
 
 
         if self.mouse_pressed[0] != pygame.mouse.get_pressed()[0] :
@@ -57,15 +84,12 @@ class Player():
             
             if self.mouse_pressed[0] :
                 self.gravity = -self.gravity
-
-        # if keys[pygame.K_LSHIFT]:
-        #     self.gravity = -self.gravity
         
         if self.mouse_pressed[2] != pygame.mouse.get_pressed()[2]:
             self.mouse_pressed[2] = pygame.mouse.get_pressed()[2]            
             
             if self.mouse_pressed[2]:
-                self.speed[1] = self.speed[1] * -1.5
+                self.speed[0] = self.speed[0] * -1.5
             else: pass
 
     def apply_mov(self, blocks):
