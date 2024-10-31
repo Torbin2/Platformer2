@@ -12,7 +12,7 @@ class Player():
         self.ground_timer = 0 #cyote_time
         self.mouse_pressed = [False, False, False]
 
-        self.gravity = 1 #1 is down, 0 is up
+        self.gravity = 1 #1 is down, -1 is up
 
         self.state = "grounded"
 
@@ -44,8 +44,8 @@ class Player():
         if keys[pygame.K_SPACE] and self.ground_timer > 0:
                 
                 if self.gravity == 1:
-                    self.speed[1] = -13
-                else: self.speed[1] = +13
+                    self.speed[1] = -12
+                else: self.speed[1] = +12
                 self.ground_timer = 0    
         self.ground_timer -= 1
 
@@ -86,10 +86,9 @@ class Player():
 
         # gravity
 
-        if self.speed[1] <= 60:
-            if self.gravity == 1: 
-                self.speed[1] += 1
-            else: self.speed[1] -= 1
+        if abs(self.speed[1]) <= 20:
+            self.speed[1] += 1 * self.gravity
+              
         self.rect.y += self.speed[1] * self.scale
 
         self.state = "air"
