@@ -12,16 +12,16 @@ class Menu:
         self.screen = pygame.display.set_mode((480 * self.scale, 270* self.scale))
         pygame.display.set_caption('game')
         self.clock = pygame.time.Clock()
-        self.font = pygame.font.Font(pygame.font.get_default_font(), 15* self.scale)
+        self.font = pygame.font.Font(pygame.font.get_default_font(), 25* self.scale)
         self.colors = ["#041413", "#25BEB3", "#146963"]
 
         self.viewing = "main"
         self.selected = 0
         
 
-        self.options = {"start" : 30,
-                        "options" : 70,
-                        "quit" : 100 }
+        self.options = {"start" : 40,
+                        "options" : 140,
+                        "quit" : 180 }
         
 
 
