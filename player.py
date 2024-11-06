@@ -103,7 +103,11 @@ class Player():
                 self.speed[1] = 0
                 self.state = "grounded"
             
-            
+    def update_settings(self, scale):
+        old_center = self.rect.center # / scale 
+        self.scale = scale           
+        self.rect = pygame.Rect(0 ,0 , 9 * scale, 16 * scale)
+        self.rect.center = old_center # * scale
 
         
 

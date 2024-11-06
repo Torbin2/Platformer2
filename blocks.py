@@ -22,12 +22,21 @@ class Blocks:
             self.blocks[x, 26] = Block(x, 26)
             self.blocks[44, x] = Block(44, x)
         
-        self.blocks[0] = Block(20, 15)
-        self.blocks[1] = Block(21, 15)
+        self.blocks[20, 15] = Block(20, 15)
+        self.blocks[21, 15] = Block(21, 15)
     
     def render(self):
         for block in self.blocks:
             pygame.draw.rect(self.screen, ("grey"), self.blocks[block].rect)
+
+    def update_settings(self, scale):
+        global sc
+        sc = scale
+        new_blocks = {}
+        for i in self.blocks:
+            new_blocks[i] = Block(i[0], i[1])
+        
+        self.blocks = new_blocks
 
 
 class Block:

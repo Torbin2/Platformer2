@@ -11,13 +11,13 @@ class Game:
     def __init__(self):
 
 
-        self.apply_setting()
+        self.apply_setting(True)
 
 
         pygame.display.set_caption('game')
         self.clock = pygame.time.Clock()
         
-    def apply_setting(self):
+    def apply_setting(self, new = False):
         self.settings = menu.main()
 
         self.scale = self.settings["window_size"]
@@ -25,8 +25,12 @@ class Game:
         self.fps = 60 + (60 * self.settings["high_fps"])
         print(self.fps)
 
-        self.player = Player(self.screen, self.scale)
-        self.blocks = Blocks(self.screen, self.scale)
+        if new:
+            self.player = Player(self.screen, self.scale)
+            self.blocks = Blocks(self.screen, self.scale)
+        else:
+            self.player.update_settings(self.scale)
+            self.blocks.update_settings(self.scale)
         
 
     def run(self):
@@ -35,6 +39,11 @@ class Game:
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.apply_setting()
+
+
 
             self.screen.fill("black")
 
