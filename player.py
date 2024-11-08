@@ -35,10 +35,10 @@ class Player():
         #         self.input_block = False
         if keys[pygame.K_a]:
             if self.speed[0] > -10:
-                self.speed[0] -= 1.9
+                self.speed[0] -= 1
         elif keys[pygame.K_d] :
             if self.speed[0] < 10:
-                self.speed[0] += 1.9
+                self.speed[0] += 1
 
         if keys[pygame.K_SPACE] and self.jumps > 0:
                 
@@ -89,8 +89,8 @@ class Player():
         
         
         #friction 
-        if self.state == "grounded": num = 1.5
-        else: num =1
+        if self.state == "grounded": num = 0.7
+        else: num =0.3
         
         if self.speed[0] > 0:
             if self.speed[0] - num <0: self.speed[0] = 0
