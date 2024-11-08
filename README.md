@@ -4,7 +4,8 @@ controls: a/d - to move, space - jump, Lshift - flip
 TODO:
 -camera
 -move collision to Blocks()
--spike 
+-rendering/colision optimization
+-spike (Cx - Px)² + (Cy - Py)² <= rad
 -implement spritesheet
 -level editor
 -
