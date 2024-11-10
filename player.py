@@ -27,10 +27,12 @@ class Player():
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:
-            self.speed[0] -= 1
+            if self.speed[0] > -10:
+                self.speed[0] -= 1
             self.keys_pressed["a/d"] = True
-        elif keys[pygame.K_d] :
-            self.speed[0] += 1
+        elif keys[pygame.K_d]:
+            if self.speed[0] < 10:
+                self.speed[0] += 1
             self.keys_pressed["a/d"] = True
         else:
             self.keys_pressed["a/d"] = False
@@ -96,9 +98,9 @@ class Player():
             else:self.speed[0] += num
 
         # gravity
-        if abs(self.speed[1]) <= 15:
-            self.speed[1] += 1 * self.gravity
-        else: self.speed[1] = 15 * self.gravity #change this
+        if abs(self.speed[1]) < 10:
+            self.speed[1] += 0.7 * self.gravity
+        else: self.speed[1] = 9.9 * self.gravity #change this
         
               
         self.rect.y += self.speed[1] * self.scale
@@ -126,22 +128,22 @@ class Player():
         self.rect.center = old_center # * scale
 
     def update_camera(self, camera):
-        if self.rect.x  + camera[0] < 80 * self.scale or self.rect.x + camera[0] > 400 * self.scale:
-            dist_to_edge = max(min(self.rect.x  + camera[0], 480 * self.scale - (self.rect.x + camera[0]) ) / 80 * self.scale, 0.2) #max() to avoid jitter
+        if self.rect.x  + camera[0] < 160 * self.scale or self.rect.x + camera[0] > 320 * self.scale:
+            dist_to_edge = max(min(self.rect.x  + camera[0], 480 * self.scale - (self.rect.x + camera[0]) ) / (160 * self.scale), 0.2) #max() to avoid jitter
             
-            if self.rect.x + camera[0] < 80 * self.scale:
-                cam_mov = min((self.speed[0] * self.scale) / dist_to_edge, -5 / dist_to_edge)
+            if self.rect.x + camera[0] < 160 * self.scale:
+                cam_mov = min((self.speed[0] * self.scale)/ 8 / dist_to_edge, (-2 * self.scale)/ dist_to_edge)
             else:
-                cam_mov = max((self.speed[0] * self.scale) / dist_to_edge, 5 / dist_to_edge) #incase speed = 0
-            camera[0] -= cam_mov
+                cam_mov = max((self.speed[0] * self.scale)/8 / dist_to_edge, (2* self.scale) / dist_to_edge) #incase speed = 0
+            camera[0] -= cam_mov           
+
+        if self.rect.y  + camera[1] < 90 * self.scale or self.rect.y + camera[1] > 180 * self.scale:
+            dist_to_edge = max(min(self.rect.y  + camera[1], 270 * self.scale - (self.rect.y + camera[1]) ) / (90 * self.scale), 0.2) #max() to avoid jitter
             
-        if self.rect.y  + camera[1] < 100 * self.scale or self.rect.y + camera[1] > 170 * self.scale:
-            dist_to_edge = max(min(self.rect.y  + camera[1], 270 * self.scale - (self.rect.y + camera[1]) ) / 100 * self.scale, 0.2) #max() to avoid jitter
-            
-            if self.rect.y + camera[1] < 100 * self.scale:
-                cam_mov = min((self.speed[1] * self.scale) / dist_to_edge, -10 / dist_to_edge)
+            if self.rect.y + camera[1] < 90 * self.scale:
+                cam_mov = min((self.speed[1] * self.scale)/2 / dist_to_edge, (-4 * self.scale)/ dist_to_edge)
             else:
-                cam_mov = max((self.speed[1] * self.scale) / dist_to_edge, 10 / dist_to_edge) #incase speed = 0
+                cam_mov = max((self.speed[1] * self.scale)/2 / dist_to_edge, (-4 * self.scale)/ dist_to_edge) #incase speed = 0
             camera[1] -= cam_mov
 
         return camera
