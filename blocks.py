@@ -18,16 +18,19 @@ class Blocks:
         for x in range(90):
             #screen is (45, 27)
             self.blocks[x, 0] = Block(x, 0)
+            self.blocks[x + 90, 0] = Block(x + 90, 0)
+            self.blocks[x + 180, 0] = Block(x + 180, 0)
             self.blocks[0, x] = Block(0, x)
             self.blocks[x, 26] = Block(x, 26)
-            self.blocks[44, x] = Block(44, x)
         
         self.blocks[20, 15] = Block(20, 15)
         self.blocks[21, 15] = Block(21, 15)
     
-    def render(self):
+    def render(self, camera):
         for block in self.blocks:
-            pygame.draw.rect(self.screen, ("grey"), self.blocks[block].rect)
+            rect = self.blocks[block].rect
+            drawn_rect = pygame.Rect(rect.left + camera[0], rect.top + camera[1], rect.width, rect.height)
+            pygame.draw.rect(self.screen, ("grey"), drawn_rect)
 
     def update_settings(self, scale):
         global sc

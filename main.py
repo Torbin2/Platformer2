@@ -13,7 +13,7 @@ class Game:
 
         self.apply_setting(True)
 
-
+        self.camera = [0, 0]
         pygame.display.set_caption('game')
         self.clock = pygame.time.Clock()
         
@@ -47,8 +47,16 @@ class Game:
 
             self.screen.fill("black")
 
-            self.blocks.render()
+            
             self.player.update(self.blocks.blocks)
+            
+            #draw
+            self.camera = self.player.update_camera(self.camera)
+
+            self.blocks.render(self.camera)
+            self.player.draw(self.camera)
+            
+            pygame.draw.rect(self.screen, ("orange"), pygame.Rect(220 * self.scale +self.camera[0] ,125 *self.scale +self.camera[1] , 10 * self.scale, 10 * self.scale))
 
             self.clock.tick(self.fps)
             pygame.display.update()

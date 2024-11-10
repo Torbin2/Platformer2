@@ -5,13 +5,14 @@ class Player():
     def __init__(self, screen, scale):
         self.scale = scale
         
-        self.rect = pygame.Rect(45 * scale, 80 * scale, 9 * scale, 16 * scale)
+        self.rect = pygame.Rect(231 * scale, 109 * scale, 9 * scale, 16 * scale)
         self.speed = [0,0]
         self.screen = screen
 
         self.mouse_pressed = [False, False, False]
         self.keys_pressed = {"space" : False,
-                             "shift": False}
+                             "shift": False,
+                             "a/d": False}
 
         self.gravity = 1 #1 is down, -1 is up
 
@@ -24,21 +25,15 @@ class Player():
 
     def input(self):
         keys = pygame.key.get_pressed()
-        # if not self.input_block:
-        #     if keys[pygame.K_a]:
-        #         if self.speed[0] > -60: self.speed[0] -= 4
-        #     if keys[pygame.K_d]:
-        #         if self.speed[0] < 60: self.speed[0] += 4
-        # else:
-        #     self.input_timer +=1
-        #     if self.input_timer >= 30:
-        #         self.input_block = False
+
         if keys[pygame.K_a]:
-            if self.speed[0] > -10:
-                self.speed[0] -= 1
+            self.speed[0] -= 1
+            self.keys_pressed["a/d"] = True
         elif keys[pygame.K_d] :
-            if self.speed[0] < 10:
-                self.speed[0] += 1
+            self.speed[0] += 1
+            self.keys_pressed["a/d"] = True
+        else:
+            self.keys_pressed["a/d"] = False
 
         if keys[pygame.K_SPACE] and self.jumps > 0:
                 
@@ -68,12 +63,10 @@ class Player():
             if self.mouse_pressed[0] :
                 self.gravity = -self.gravity
         
-
-
     def apply_mov(self, blocks):
         # left & right
         self.rect.centerx += self.speed[0] * self.scale
-        
+
         for i in blocks:
             if self.rect.colliderect(blocks[i].rect):
                 if self.speed[0] > 0: 
@@ -89,6 +82,8 @@ class Player():
         
         
         #friction 
+
+        # if self.keys_pressed["a/d"] = True
         if self.state == "grounded": num = 0.7
         else: num =0.3
         
@@ -130,12 +125,33 @@ class Player():
         self.rect = pygame.Rect(0 ,0 , 9 * scale, 16 * scale)
         self.rect.center = old_center # * scale
 
-        
+    def update_camera(self, camera):
+        if self.rect.x  + camera[0] < 80 * self.scale or self.rect.x + camera[0] > 400 * self.scale:
+            dist_to_edge = max(min(self.rect.x  + camera[0], 480 * self.scale - (self.rect.x + camera[0]) ) / 80 * self.scale, 0.2) #max() to avoid jitter
+            
+            if self.rect.x + camera[0] < 80 * self.scale:
+                cam_mov = min((self.speed[0] * self.scale) / dist_to_edge, -5 / dist_to_edge)
+            else:
+                cam_mov = max((self.speed[0] * self.scale) / dist_to_edge, 5 / dist_to_edge) #incase speed = 0
+            camera[0] -= cam_mov
+            
+        if self.rect.y  + camera[1] < 100 * self.scale or self.rect.y + camera[1] > 170 * self.scale:
+            dist_to_edge = max(min(self.rect.y  + camera[1], 270 * self.scale - (self.rect.y + camera[1]) ) / 100 * self.scale, 0.2) #max() to avoid jitter
+            
+            if self.rect.y + camera[1] < 100 * self.scale:
+                cam_mov = min((self.speed[1] * self.scale) / dist_to_edge, -10 / dist_to_edge)
+            else:
+                cam_mov = max((self.speed[1] * self.scale) / dist_to_edge, 10 / dist_to_edge) #incase speed = 0
+            camera[1] -= cam_mov
 
-    def draw(self):
-        pygame.draw.rect(self.screen, 'white', self.rect)
+        return camera
+
+    def draw(self, camera):
+        drawn_rect = pygame.Rect(self.rect.left + camera[0], self.rect.top + camera[1], self.rect.width, self.rect.height)
+
+        pygame.draw.rect(self.screen, 'white', drawn_rect)
 
     def update(self, blocks):
         self.input()
         self.apply_mov(blocks)
-        self.draw()
+        
