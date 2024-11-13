@@ -83,27 +83,30 @@ class Player():
             
             self.rect.centerx += stepx
             
-            player_pos = [self.rect.centerx //10, self.rect.centery // 10]
+            player_pos = [self.rect.centerx //(10 *self.scale), self.rect.centery // (10*self.scale)]
             
             blocks_around = []
+
             for offset in OFFSETS:
-                blocks_around.append((player_pos[0] + offset[0], player_pos[1] + offset[1]))
-            print(blocks_around)
+                tile = (player_pos[0] + offset[0], player_pos[1] + offset[1])
+                if tile in blocks:
+                    blocks_around.append(tile)
+
             
-            for i in blocks_around:
+            for i in blocks_around:            
+                print(blocks[i].rect)
+                if self.rect.colliderect(blocks[i].rect):
+                    print("colison")
+                    if self.speed[0] > 0: 
+                        self.rect.right = blocks[i].rect.left
+                        self.speed[0] -= 4
+                        if self.speed[0] < 0: self.speed[0] = 0 #in case of direction shift by collision
 
-                try:
-                    if self.rect.colliderect(blocks[i].rect):
-                        if self.speed[0] > 0: 
-                            self.rect.right = blocks[i].rect.left
-                            self.speed[0] -= 4
-                            if self.speed[0] < 0: self.speed[0] = 0 #in case of direction shift by collision
+                    elif self.speed[0] < 0: 
+                        self.rect.left = blocks[i].rect.right
+                        self.speed[0] += 4
+                        if self.speed[0] > 0: self.speed[0] = 0#in case of direction shift by collision
 
-                        elif self.speed[0] < 0: 
-                            self.rect.left = blocks[i].rect.right
-                            self.speed[0] += 4
-                            if self.speed[0] > 0: self.speed[0] = 0#in case of direction shift by collision
-                except KeyError: pass
         
         
         
@@ -155,9 +158,9 @@ class Player():
             dist_to_edge = max(min(self.rect.x  + camera[0], 480 * self.scale - (self.rect.x + camera[0]) ) / (160 * self.scale), 0.2) #max() to avoid jitter
             
             if self.rect.x + camera[0] < 160 * self.scale:
-                cam_mov = min((self.speed[0] * self.scale)/ 8 / dist_to_edge, (-2 * self.scale)/ dist_to_edge)
+                cam_mov = min((self.speed[0] * self.scale)/ 3 / dist_to_edge, (-4 * self.scale)/ dist_to_edge)
             else:
-                cam_mov = max((self.speed[0] * self.scale)/8 / dist_to_edge, (2* self.scale) / dist_to_edge) #incase speed = 0
+                cam_mov = max((self.speed[0] * self.scale)/3 / dist_to_edge, (4* self.scale) / dist_to_edge) #incase speed = 0
             camera[0] -= cam_mov           
 
         if self.rect.y  + camera[1] < 90 * self.scale or self.rect.y + camera[1] > 180 * self.scale:

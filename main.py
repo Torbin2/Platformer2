@@ -55,8 +55,6 @@ class Game:
 
             self.blocks.render(self.camera)
             self.player.draw(self.camera)
-            
-            pygame.draw.rect(self.screen, ("orange"), pygame.Rect(220 * self.scale +self.camera[0] ,125 *self.scale +self.camera[1] , 10 * self.scale, 10 * self.scale))
 
             self.clock.tick(self.fps)
             pygame.display.update()
