@@ -16,7 +16,7 @@ class Blocks:
 
 
         for x in range(90):
-            #screen is (45, 27)
+            #screen is (48, 27)
             self.blocks[x, 0] = Block(x, 0)
             self.blocks[x + 90, 0] = Block(x + 90, 0)
             self.blocks[x + 180, 0] = Block(x + 180, 0)
@@ -27,7 +27,10 @@ class Blocks:
         self.blocks[21, 15] = Block(21, 15)
     
     def render(self, camera):
-        for block in self.blocks:
+
+        onscreen_blocks = [key for key in self.blocks if -1 < key[0]+ (camera[0]/(10*sc)) < 49 and -1 < key[1] +(camera[1]/(10*sc)) < 28]
+
+        for block in onscreen_blocks:
             rect = self.blocks[block].rect
             drawn_rect = pygame.Rect(rect.left + camera[0], rect.top + camera[1], rect.width, rect.height)
             pygame.draw.rect(self.screen, ("grey"), drawn_rect)

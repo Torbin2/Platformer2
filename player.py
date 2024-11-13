@@ -1,4 +1,12 @@
 import pygame
+OFFSETS = [(-1, -1),(-1, 0),(-1, 1),(0, -1),(0, 0),(0, 1),(1, -1),(1, 0),(1, 1)]
+# str = "["
+# for i in range(3):
+#     for j in range(3):
+#         str += f",({i-1}, {j-1})"
+# str += "]"
+# print(str)
+
 
 class Player():
 
@@ -20,14 +28,13 @@ class Player():
         self.jumps = 2
         self.flips = 1
 
-        # self.input_block = False
-        # self.input_timer = 0
 
     def input(self):
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:
             if self.speed[0] > -10:
+   
                 self.speed[0] -= 1
             self.keys_pressed["a/d"] = True
         elif keys[pygame.K_d]:
@@ -65,21 +72,38 @@ class Player():
             if self.mouse_pressed[0] :
                 self.gravity = -self.gravity
         
-    def apply_mov(self, blocks):
+    def apply_mov(self, blocks): #and collison
         # left & right
-        self.rect.centerx += self.speed[0] * self.scale
 
-        for i in blocks:
-            if self.rect.colliderect(blocks[i].rect):
-                if self.speed[0] > 0: 
-                    self.rect.right = blocks[i].rect.left
-                    self.speed[0] -= 4
-                    if self.speed[0] < 0: self.speed[0] = 0 #in case of direction shift by collision
+        repeats = abs(int(self.speed[0] // 10)) + 1
+        stepx = self.speed[0] * self.scale/ repeats
+         
+        print(repeats, stepx)
+        for i in range(repeats): #FIX
+            
+            self.rect.centerx += stepx
+            
+            player_pos = [self.rect.centerx //10, self.rect.centery // 10]
+            
+            blocks_around = []
+            for offset in OFFSETS:
+                blocks_around.append((player_pos[0] + offset[0], player_pos[1] + offset[1]))
+            print(blocks_around)
+            
+            for i in blocks_around:
 
-                elif self.speed[0] < 0: 
-                    self.rect.left = blocks[i].rect.right
-                    self.speed[0] += 4
-                    if self.speed[0] > 0: self.speed[0] = 0#in case of direction shift by collision
+                try:
+                    if self.rect.colliderect(blocks[i].rect):
+                        if self.speed[0] > 0: 
+                            self.rect.right = blocks[i].rect.left
+                            self.speed[0] -= 4
+                            if self.speed[0] < 0: self.speed[0] = 0 #in case of direction shift by collision
+
+                        elif self.speed[0] < 0: 
+                            self.rect.left = blocks[i].rect.right
+                            self.speed[0] += 4
+                            if self.speed[0] > 0: self.speed[0] = 0#in case of direction shift by collision
+                except KeyError: pass
         
         
         
@@ -98,9 +122,8 @@ class Player():
             else:self.speed[0] += num
 
         # gravity
-        if abs(self.speed[1]) < 10:
+        if self.speed[1] * self.gravity < 10: #grav is 1/-1
             self.speed[1] += 0.7 * self.gravity
-        else: self.speed[1] = 9.9 * self.gravity #change this
         
               
         self.rect.y += self.speed[1] * self.scale
