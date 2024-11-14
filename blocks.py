@@ -30,6 +30,12 @@ class Blocks:
 
         self.blocks[20, 15] = Block(20, 15, color="red")
         self.blocks[21, 15] = Block(21, 15, color="green")
+
+        self.blocks[23, 16] = Block(23, 16, color="skyblue")
+
+        for m in range(10):
+            self.blocks[1 + m, 16 + m] = Block(1 + m, 16 + m, color="forestgreen")
+            self.blocks[1 + m, 16] = Block(1 + m, 16, color="orange")
     
     def render(self, camera):
 
@@ -40,12 +46,15 @@ class Blocks:
         for block in onscreen_blocks:
             self.blocks[block].render(self.screen, camera)
 
-    def update_settings(self):
+    def update_settings(self, scale_):
+
+        global scale
+        scale = scale_
 
         new_blocks = {}
 
         for i in self.blocks:
-            new_blocks[i] = Block(i[0], i[1])
+            new_blocks[i] = Block(i[0], i[1], type_=self.blocks[i].type_, color=self.blocks[i].color)
         
         self.blocks = new_blocks
 

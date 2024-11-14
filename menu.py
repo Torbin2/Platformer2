@@ -75,7 +75,7 @@ class Menu:
                         if self.selected > 0:
                             self.selected -= 1
                     elif event.key == pygame.K_s:
-                        if self.selected < len(self.options) - 1:
+                        if self.selected < len(self.options):
                             self.selected += 1
 
                     elif event.key == pygame.K_RETURN:
