@@ -1,7 +1,7 @@
-#**PLATFORMER2** \
-controls: a/d - to move, space - jump, Lshift - flip \
+# PLATFORMER2
+controls: a/d - to move, space - jump, Lshift - flip
 
-TODO: 
+### #TODO: 
 - [ ] move collision to Blocks()
 - [ ] improve block colision at high speed
 - [ ] rendering/colision optimization
