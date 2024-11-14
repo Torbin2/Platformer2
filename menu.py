@@ -31,7 +31,7 @@ class Menu:
 
         self.options = {"start" : 40,
                         "options" : 140,
-                        "quit" : 180 }
+                        "quit" : 180}
         
 
 
@@ -72,10 +72,10 @@ class Menu:
                     exit()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_w:
-                        if self.selected != 0:
+                        if self.selected > 0:
                             self.selected -= 1
                     elif event.key == pygame.K_s:
-                        if self.selected != len(self.options):
+                        if self.selected < len(self.options) - 1:
                             self.selected += 1
 
                     elif event.key == pygame.K_RETURN:
@@ -108,14 +108,8 @@ class Menu:
                                     with open('settings.json', "w") as f:
                                         json.dump(self.settings, f)
 
-
             self.screen.fill(self.colors[0])
             self.render()
 
-
             self.clock.tick(60)
             pygame.display.update()
-            
-
-
-

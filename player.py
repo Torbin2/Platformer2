@@ -1,7 +1,15 @@
 import pygame
 import enum
 
-OFFSETS = [(-1, -1),(-1, 0),(-1, 1),(0, -1),(0, 0),(0, 1),(1, -1),(1, 0),(1, 1)]
+OFFSETS = [(-1, -1),
+           (-1, 0),
+           (-1, 1),
+           (0, -1),
+           (0, 0),
+           (0, 1),
+           (1, -1),
+           (1, 0),
+           (1, 1)]
 # str = "["
 # for i in range(3):
 #     for j in range(3):
@@ -16,7 +24,10 @@ class Player:
     def __init__(self, screen, scale):
         self.scale = scale
         
-        self.rect = pygame.Rect(231 * scale, 109 * scale, 9 * scale, 16 * scale)
+        self.rect = pygame.Rect(231 * scale,
+                                109 * scale,
+                                9 * scale,
+                                16 * scale)
         self.speed = [0,0]
         self.screen = screen
 
