@@ -1,4 +1,6 @@
 import pygame
+import enum
+
 OFFSETS = [(-1, -1),(-1, 0),(-1, 1),(0, -1),(0, 0),(0, 1),(1, -1),(1, 0),(1, 1)]
 # str = "["
 # for i in range(3):
@@ -6,9 +8,10 @@ OFFSETS = [(-1, -1),(-1, 0),(-1, 1),(0, -1),(0, 0),(0, 1),(1, -1),(1, 0),(1, 1)]
 #         str += f",({i-1}, {j-1})"
 # str += "]"
 # print(str)
+class PlayerState(enum.Enum):
+    GROUNDED = enum.auto()
 
-
-class Player():
+class Player:
 
     def __init__(self, screen, scale):
         self.scale = scale
@@ -24,7 +27,7 @@ class Player():
 
         self.gravity = 1 #1 is down, -1 is up
 
-        self.state = "grounded"
+        self.state = PlayerState.GROUNDED
         self.jumps = 2
         self.flips = 1
 
@@ -62,19 +65,14 @@ class Player():
             
             self.keys_pressed["shift"] = True
         else: self.keys_pressed["shift"] = False
-
-        if self.mouse_pressed[0] != pygame.mouse.get_pressed()[0] :
-            self.mouse_pressed[0] = pygame.mouse.get_pressed()[0]
-            
-            if self.mouse_pressed[0] :
-                self.gravity = -self.gravity
         
     def apply_mov(self, blocks): #and collison
         # left & right
 
         repeats = int(abs(self.speed[0]) // 10) + 1
         stepx = self.speed[0] * self.scale/ repeats
-
+         
+        print(repeats, stepx)
         for i in range(repeats): #FIX
             
             self.rect.centerx += stepx
@@ -90,7 +88,9 @@ class Player():
 
             
             for i in blocks_around:            
+                print(blocks[i].rect)
                 if self.rect.colliderect(blocks[i].rect):
+                    print("colison")
                     if self.speed[0] > 0: 
                         self.rect.right = blocks[i].rect.left
                         self.speed[0] -= 4
@@ -105,7 +105,7 @@ class Player():
         #friction 
 
         # if self.keys_pressed["a/d"] = True
-        if self.state == "grounded": num = 0.7
+        if self.state == PlayerState.GROUNDED: num = 0.7
         else: num =0.3
         
         if self.speed[0] > 0:
