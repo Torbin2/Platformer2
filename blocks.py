@@ -1,4 +1,5 @@
 import pygame
+
 class Blocks:
     
 
@@ -23,19 +24,18 @@ class Blocks:
             self.blocks[0, x] = Block(0, x)
             self.blocks[x, 26] = Block(x, 26)
         
-        self.blocks[20, 15] = Block(20, 15)
-        self.blocks[21, 15] = Block(21, 15)
+        self.blocks[20, 15] = Block(20, 15, color="red")
+        self.blocks[21, 15] = Block(21, 15, color="green")
     
     def render(self, camera):
 
         onscreen_blocks = [key for key in self.blocks if -1 < key[0]+ (camera[0]/(10*sc)) < 49 and -1 < key[1] +(camera[1]/(10*sc)) < 28]
 
         for block in onscreen_blocks:
-            rect = self.blocks[block].rect
-            drawn_rect = pygame.Rect(rect.left + camera[0], rect.top + camera[1], rect.width, rect.height)
-            pygame.draw.rect(self.screen, ("grey"), drawn_rect)
+            self.blocks[block].render(self.screen, camera)
 
     def update_settings(self, scale):
+
         global sc
         sc = scale
         new_blocks = {}
@@ -46,8 +46,13 @@ class Blocks:
 
 
 class Block:
-    def __init__(self, x, y):
+    def __init__(self, x, y, type="block", color=("grey")):
         self.rect = pygame.Rect(x *10*sc, y *10*sc, 10 *sc, 10 *sc)
-        self.type = "block"
+        self.type = type
+        self.color = color
 
-    
+    def render(self, screen, camera):
+        pygame.draw.rect(screen, self.color, pygame.Rect(self.rect.left + camera[0],
+                                                            self.rect.top + camera[1],
+                                                            self.rect.width,
+                                                            self.rect.height))
