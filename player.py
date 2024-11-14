@@ -61,8 +61,8 @@ class Player:
                     self.jumps -= 1
 
                     if self.gravity == 1:
-                        self.speed[1] = -12
-                    else: self.speed[1] = +12
+                        self.speed[1] -= 12
+                    else: self.speed[1] += 12
                 
                 self.keys_pressed["space"] = True 
         else: self.keys_pressed["space"] = False
@@ -83,8 +83,7 @@ class Player:
         repeats = int(abs(self.speed[0]) // 10) + 1
         stepx = self.speed[0] * self.scale/ repeats
          
-        print(repeats, stepx)
-        for i in range(repeats): #FIX
+        for i in range(repeats): 
             
             self.rect.centerx += stepx
             
@@ -98,10 +97,8 @@ class Player:
                     blocks_around.append(tile)
 
             
-            for i in blocks_around:            
-                print(blocks[i].rect)
+            for i in blocks_around:     
                 if self.rect.colliderect(blocks[i].rect):
-                    print("colison")
                     if self.speed[0] > 0: 
                         self.rect.right = blocks[i].rect.left
                         self.speed[0] -= 4
@@ -116,8 +113,9 @@ class Player:
         #friction 
 
         # if self.keys_pressed["a/d"] = True
-        if self.state == PlayerState.GROUNDED: num = 0.7
-        else: num =0.3
+        if self.state == PlayerState.GROUNDED: num = max(self.speed[0] / 10, 0.7)
+        else: num = max(self.speed[0] / 15, 0.4)
+        print(num)
         
         if self.speed[0] > 0:
             if self.speed[0] - num <0: self.speed[0] = 0
@@ -135,6 +133,7 @@ class Player:
         repeats = int(abs(self.speed[1]) // 10) + 1
         stepy = self.speed[1] * self.scale/ repeats
 
+        ground_touch = False
         for i in range(repeats):
             
             self.rect.centery += stepy
@@ -148,22 +147,21 @@ class Player:
                 if tile in blocks:
                     blocks_around.append(tile)
 
-            ground_touch = False 
+             
             for i in blocks_around:            
                 if self.rect.colliderect(blocks[i].rect):
-                    print("a")
                     if self.speed[1] > 0: 
                         self.rect.bottom = blocks[i].rect.top
                         self.speed[1] = 0
                         if self.gravity == 1:
                             ground_touch = True
-                    elif self.speed[0] < 0: 
+                    elif self.speed[1] < 0: 
                         self.rect.top = blocks[i].rect.bottom
                         self.speed[1] = 0
                         if self.gravity == -1:
                             ground_touch = True
         if ground_touch:
-            self.state = "grounded"
+            self.state = PlayerState.GROUNDED
             self.flips = 1
             self.jumps = 2
             
