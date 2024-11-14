@@ -33,13 +33,10 @@ class Player():
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:
-            if self.speed[0] > -10:
-   
-                self.speed[0] -= 1
+            self.speed[0] -= 1
             self.keys_pressed["a/d"] = True
         elif keys[pygame.K_d]:
-            if self.speed[0] < 10:
-                self.speed[0] += 1
+            self.speed[0] += 1
             self.keys_pressed["a/d"] = True
         else:
             self.keys_pressed["a/d"] = False
@@ -75,10 +72,9 @@ class Player():
     def apply_mov(self, blocks): #and collison
         # left & right
 
-        repeats = abs(int(self.speed[0] // 10)) + 1
+        repeats = int(abs(self.speed[0]) // 10) + 1
         stepx = self.speed[0] * self.scale/ repeats
-         
-        print(repeats, stepx)
+
         for i in range(repeats): #FIX
             
             self.rect.centerx += stepx
@@ -94,9 +90,7 @@ class Player():
 
             
             for i in blocks_around:            
-                print(blocks[i].rect)
                 if self.rect.colliderect(blocks[i].rect):
-                    print("colison")
                     if self.speed[0] > 0: 
                         self.rect.right = blocks[i].rect.left
                         self.speed[0] -= 4
@@ -107,8 +101,6 @@ class Player():
                         self.speed[0] += 4
                         if self.speed[0] > 0: self.speed[0] = 0#in case of direction shift by collision
 
-        
-        
         
         #friction 
 
@@ -129,21 +121,38 @@ class Player():
             self.speed[1] += 0.7 * self.gravity
         
               
-        self.rect.y += self.speed[1] * self.scale
+        repeats = int(abs(self.speed[1]) // 10) + 1
+        stepy = self.speed[1] * self.scale/ repeats
 
-        colided = False
-        for i in blocks:
-            if self.rect.colliderect(blocks[i].rect):
-                
-                if self.speed[1] > 0: 
-                    self.rect.bottom = blocks[i].rect.top   
-                elif self.speed[1] < 0: 
-                    self.rect.top = blocks[i].rect.bottom
+        for i in range(repeats):
+            
+            self.rect.centery += stepy
+            
+            player_pos = [self.rect.centerx //(10 *self.scale), self.rect.centery // (10*self.scale)]
+            
+            blocks_around = []
 
-                colided = True
-        if colided:
+            for offset in OFFSETS:
+                tile = (player_pos[0] + offset[0], player_pos[1] + offset[1])
+                if tile in blocks:
+                    blocks_around.append(tile)
+
+            ground_touch = False 
+            for i in blocks_around:            
+                if self.rect.colliderect(blocks[i].rect):
+                    print("a")
+                    if self.speed[1] > 0: 
+                        self.rect.bottom = blocks[i].rect.top
+                        self.speed[1] = 0
+                        if self.gravity == 1:
+                            ground_touch = True
+                    elif self.speed[0] < 0: 
+                        self.rect.top = blocks[i].rect.bottom
+                        self.speed[1] = 0
+                        if self.gravity == -1:
+                            ground_touch = True
+        if ground_touch:
             self.state = "grounded"
-            self.speed[1] = 0
             self.flips = 1
             self.jumps = 2
             
