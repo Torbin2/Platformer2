@@ -11,6 +11,8 @@ class Menu:
             self.settings = {
                 "window_size": 2,
                 "high_fps": False,
+                "sound": False,
+                "back": ""
             }
             with open("settings.json", "w") as f:
                 json.dump(self.settings, f)
@@ -108,13 +110,6 @@ class Menu:
 
 
             self.screen.fill(self.colors[0])
-
-            # match self.viewing:
-            #     case 'main':
-            #         self.render(self.options)
-            #     case 'settings':
-            #         self.render(self.settings)
-
             self.render()
 
 
