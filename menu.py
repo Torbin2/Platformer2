@@ -4,8 +4,16 @@ import json
 class Menu:
     def __init__(self):
 
-        with open("settings.json", "r") as f:
-            self.settings = json.load(f)
+        try:
+            with open("settings.json", "r") as f:
+                self.settings = json.load(f)
+        except FileNotFoundError:
+            self.settings = {
+                "window_size": 2,
+                "high_fps": False,
+            }
+            with open("settings.json", "w") as f:
+                json.dump(self.settings, f)
         
         self.scale = self.settings["window_size"]
 
