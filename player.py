@@ -75,7 +75,7 @@ class Player():
     def apply_mov(self, blocks): #and collison
         # left & right
 
-        repeats = abs(int(self.speed[0] // 10)) + 1
+        repeats = int(abs(self.speed[0]) // 10) + 1
         stepx = self.speed[0] * self.scale/ repeats
          
         print(repeats, stepx)
