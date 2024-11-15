@@ -2,8 +2,8 @@ import pygame
 import enum
 import math
 
-OFFSETS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0),(1, 1), 
-           (0, 2), (0,-2)] 
+OFFSETS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0),(1, 1),
+           (0, 2), (0,-2)]
 MORE_OFFSETS= [(-2, -2),(-2, -1),(-2, 0),(-2, 1),(-2, 2),
                (-1, -2),(-1, -1),(-1, 0),(-1, 1),(-1, 2),
                (0, -2),(0, -1),(0, 0),(0, 1),(0, 2),
@@ -64,12 +64,12 @@ class Player:
                 self.keys_pressed["space"] = True 
         else: self.keys_pressed["space"] = False
 
-        if keys[pygame.K_LSHIFT] and self.flips > 0:
-            
-            if not self.keys_pressed["shift"]:
+        if keys[pygame.K_LSHIFT]:
+            if self.flips > 0:
+                if not self.keys_pressed["shift"]:
 
-                self.flips -= 1
-                self.gravity = -self.gravity
+                    self.flips -= 1
+                    self.gravity = -self.gravity
             
             self.keys_pressed["shift"] = True
         else: self.keys_pressed["shift"] = False
@@ -152,7 +152,7 @@ class Player:
                         blocks_around.append(tile)
 
             self.test_rect = ground_check_rect
-            
+
             for i in blocks_around:
                 if ground_check_rect.colliderect(blocks[i].rect):
                     ground_touch = True
@@ -175,17 +175,17 @@ class Player:
             self.flips = 1
             self.jumps = 2
         else: self.state = PlayerState.AIR
-            
+
     def friction(self):
         #higher if not pressing a/d, (could remove)
-        if self.keys_pressed["a/d"] == True: 
+        if self.keys_pressed["a/d"] == True:
             mult = 0.2
         else: mult = 1.6
 
         #higher if grounded
-        if self.state == PlayerState.GROUNDED: num = max(abs(self.speed[0]) / 10, 0.7) * mult 
+        if self.state == PlayerState.GROUNDED: num = max(abs(self.speed[0]) / 10, 0.7) * mult
         else: num = max(abs(self.speed[0]) / 15, 0.4) * mult
-        
+
         #check if speed is positive
         try:polarity = (self.speed[0] / abs(self.speed[0]))
         except ZeroDivisionError: polarity = False
@@ -193,7 +193,7 @@ class Player:
         #apply speed based on all the above
         if abs(self.speed[0]) - num < 0: self.speed[0] = 0
         else: self.speed[0] -= num * polarity
-        
+
 
 
 
@@ -216,7 +216,7 @@ class Player:
             if tile in blocks:
                 if blocks[tile].type != "block":
                     tiles_around.append(tile)
-        
+
         for tile in tiles_around:
             event = blocks[tile].collision_logic(self.rect)
             match event:
