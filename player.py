@@ -1,5 +1,6 @@
 import pygame
 import enum
+import math
 
 OFFSETS = [(-1, -1),
            (-1, 0),
@@ -92,8 +93,8 @@ class Player:
     def apply_mov(self, blocks): #and collison
         # left & right
 
-        repeats = int(abs(self.speed[0]) // 10) + 1
-        stepx = self.speed[0] * self.scale/ repeats
+        repeats = math.ceil(abs(self.speed[0] * self.scale) / 10) + 1
+        stepx = self.speed[0] * self.scale / repeats
 
         for i in range(repeats):
             
@@ -115,11 +116,16 @@ class Player:
                         self.rect.right = blocks[i].rect.left
                         self.speed[0] -= 4
                         if self.speed[0] < 0: self.speed[0] = 0 #in case of direction shift by collision
+                        break
 
-                    elif self.speed[0] < 0: 
+                    elif self.speed[0] < 0:
                         self.rect.left = blocks[i].rect.right
                         self.speed[0] += 4
                         if self.speed[0] > 0: self.speed[0] = 0#in case of direction shift by collision
+                        break
+            else:
+                continue
+            break
 
         
         #friction 
@@ -142,8 +148,9 @@ class Player:
             self.speed[1] += 0.7 * self.gravity
         
               
-        repeats = int(abs(self.speed[1]) // 10) + 1
+        repeats = math.ceil(abs(self.speed[1] * self.scale) / 10) + 1
         stepy = self.speed[1] * self.scale/ repeats
+        print(repeats, stepy, self.speed)
 
         ground_touch = False
         for i in range(repeats):
@@ -167,11 +174,16 @@ class Player:
                         self.speed[1] = 0
                         if self.gravity == 1:
                             ground_touch = True
+                        break
                     elif self.speed[1] < 0:
                         self.rect.top = blocks[i].rect.bottom
                         self.speed[1] = 0
                         if self.gravity == -1:
                             ground_touch = True
+                        break
+            else:
+                continue
+            break
         if ground_touch:
             self.state = PlayerState.GROUNDED
             self.flips = 1
