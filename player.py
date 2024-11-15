@@ -61,8 +61,8 @@ class Player:
                     self.jumps -= 1
 
                     if self.gravity == 1:
-                        self.speed[1] -= 12
-                    else: self.speed[1] += 12
+                        self.speed[1] = -12
+                    else: self.speed[1] = +12
                 
                 self.keys_pressed["space"] = True 
         else: self.keys_pressed["space"] = False
@@ -82,13 +82,13 @@ class Player:
 
         repeats = int(abs(self.speed[0]) // 10) + 1
         stepx = self.speed[0] * self.scale/ repeats
-         
-        for i in range(repeats): 
+
+        for i in range(repeats):
             
             self.rect.centerx += stepx
             
-            player_pos = [self.rect.centerx //(10 *self.scale), self.rect.centery // (10*self.scale)]
-            
+            player_pos = [self.rect.centerx // (10 * self.scale), self.rect.centery // (10*self.scale)]
+
             blocks_around = []
 
             for offset in OFFSETS:
@@ -96,8 +96,8 @@ class Player:
                 if tile in blocks:
                     blocks_around.append(tile)
 
-            
-            for i in blocks_around:     
+
+            for i in blocks_around:
                 if self.rect.colliderect(blocks[i].rect):
                     if self.speed[0] > 0: 
                         self.rect.right = blocks[i].rect.left
@@ -120,7 +120,7 @@ class Player:
         if self.speed[0] > 0:
             if self.speed[0] - num <0: self.speed[0] = 0
             else:self.speed[0] -= num
-        
+
         elif self.speed[0] < 0:
             if self.speed[0] + num >0: self.speed[0] = 0
             else:self.speed[0] += num
@@ -135,11 +135,11 @@ class Player:
 
         ground_touch = False
         for i in range(repeats):
-            
+
             self.rect.centery += stepy
-            
+
             player_pos = [self.rect.centerx //(10 *self.scale), self.rect.centery // (10*self.scale)]
-            
+
             blocks_around = []
 
             for offset in OFFSETS:
@@ -147,15 +147,15 @@ class Player:
                 if tile in blocks:
                     blocks_around.append(tile)
 
-             
-            for i in blocks_around:            
+
+            for i in blocks_around:
                 if self.rect.colliderect(blocks[i].rect):
-                    if self.speed[1] > 0: 
+                    if self.speed[1] > 0:
                         self.rect.bottom = blocks[i].rect.top
                         self.speed[1] = 0
                         if self.gravity == 1:
                             ground_touch = True
-                    elif self.speed[1] < 0: 
+                    elif self.speed[1] < 0:
                         self.rect.top = blocks[i].rect.bottom
                         self.speed[1] = 0
                         if self.gravity == -1:
@@ -172,23 +172,15 @@ class Player:
         self.rect.center = old_center # * scale
 
     def update_camera(self, camera):
-        if self.rect.x  + camera[0] < 160 * self.scale or self.rect.x + camera[0] > 320 * self.scale:
-            dist_to_edge = max(min(self.rect.x  + camera[0], 480 * self.scale - (self.rect.x + camera[0]) ) / (160 * self.scale), 0.2) #max() to avoid jitter
-            
-            if self.rect.x + camera[0] < 160 * self.scale:
-                cam_mov = min((self.speed[0] * self.scale)/ 3 / dist_to_edge, (-4 * self.scale)/ dist_to_edge)
-            else:
-                cam_mov = max((self.speed[0] * self.scale)/3 / dist_to_edge, (4* self.scale) / dist_to_edge) #incase speed = 0
-            camera[0] -= cam_mov           
+        camera[0] *= -1
+        camera[1] *= -1
 
-        if self.rect.y  + camera[1] < 90 * self.scale or self.rect.y + camera[1] > 180 * self.scale:
-            dist_to_edge = max(min(self.rect.y  + camera[1], 270 * self.scale - (self.rect.y + camera[1]) ) / (90 * self.scale), 0.2) #max() to avoid jitter
-            
-            if self.rect.y + camera[1] < 90 * self.scale:
-                cam_mov = min((self.speed[1] * self.scale)/2 / dist_to_edge, (-4 * self.scale)/ dist_to_edge)
-            else:
-                cam_mov = max((self.speed[1] * self.scale)/2 / dist_to_edge, (-4 * self.scale)/ dist_to_edge) #incase speed = 0
-            camera[1] -= cam_mov
+        delta = [camera[0] - (self.rect.centerx - self.scale * 240), camera[1] - (self.rect.centery - self.scale * 135)]
+        camera[0] -= delta[0] / 10
+        camera[1] -= delta[1] / 10
+
+        camera[0] *= -1
+        camera[1] *= -1
 
         return camera
 
