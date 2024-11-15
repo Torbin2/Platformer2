@@ -34,7 +34,8 @@ class Player:
         self.mouse_pressed = [False, False, False]
         self.keys_pressed = {"space" : False,
                              "shift": False,
-                             "a/d": False}
+                             "a/d": False,
+                             "r": False}
 
         self.gravity = 1 #1 is down, -1 is up
 
@@ -76,7 +77,18 @@ class Player:
             
             self.keys_pressed["shift"] = True
         else: self.keys_pressed["shift"] = False
-        
+
+        if keys[pygame.K_r]:
+
+            if not self.keys_pressed["r"]:
+
+                self.rect.x = 100
+                self.rect.y = 100
+
+            self.keys_pressed["r"] = True
+
+        else: self.keys_pressed["r"] = False
+
     def apply_mov(self, blocks): #and collison
         # left & right
 
