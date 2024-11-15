@@ -51,9 +51,10 @@ class Game:
             
             #draw
             self.camera = self.player.update_camera(self.camera)
+            camera = [round(self.camera[i]) for i in range(2)]
 
-            self.blocks.render(self.camera)
-            self.player.draw(self.camera)
+            self.blocks.render(camera)
+            self.player.draw(camera)
 
             self.clock.tick(self.fps)
             pygame.display.update()
