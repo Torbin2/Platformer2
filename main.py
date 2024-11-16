@@ -2,14 +2,15 @@ import pygame
 from player import Player
 from blocks import Blocks
 from menu import Menu
+
 pygame.init()
 
 open_menu = True
 menu = Menu()
 
 class Game:
-    def __init__(self):
 
+    def __init__(self):
 
         self.apply_setting(True)
 
@@ -21,7 +22,9 @@ class Game:
         self.settings = menu.main()
 
         self.scale = self.settings["window_size"]
-        self.screen = pygame.display.set_mode((480 * self.scale, 270* self.scale)) #16:9 ratio
+        self.screen = pygame.display.set_mode((480 * self.scale,
+                                               270 * self.scale)) #16:9 ratio
+
         self.fps = 60 + (60 * self.settings["high_fps"])
         print(self.fps)
 
@@ -43,25 +46,18 @@ class Game:
                     if event.key == pygame.K_ESCAPE:
                         self.apply_setting()
 
-
-
             self.screen.fill("black")
-
-            
             self.player.update(self.blocks.blocks)
             
             #draw
             self.camera = self.player.update_camera(self.camera)
+            camera = [round(self.camera[i]) for i in range(2)]
 
-            self.blocks.render(self.camera)
-            self.player.draw(self.camera)
+            self.blocks.render(camera)
+            self.player.draw(camera)
 
             self.clock.tick(self.fps)
             pygame.display.update()
 
-    
-        
 
-
-    
 Game().run()

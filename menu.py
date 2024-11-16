@@ -62,7 +62,7 @@ class Menu:
     def apply_setting(self):#scuffed
         self.scale = self.settings["window_size"]
         self.screen = pygame.display.set_mode((480 * self.scale, 270* self.scale))
-        self.font = pygame.font.Font(pygame.font.get_default_font(), 15* self.scale)
+        self.font = pygame.font.Font(pygame.font.get_default_font(), 25* self.scale)
 
     def main(self):
         while True:
@@ -75,7 +75,9 @@ class Menu:
                         if self.selected > 0:
                             self.selected -= 1
                     elif event.key == pygame.K_s:
-                        if self.selected < len(self.options) - 1:
+                        if self.viewing == "main" and self.selected < len(self.options) - 1:
+                            self.selected += 1
+                        elif self.viewing == "settings" and self.selected < len(self.settings) -1 :
                             self.selected += 1
 
                     elif event.key == pygame.K_RETURN:
