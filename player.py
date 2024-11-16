@@ -132,7 +132,7 @@ class Player:
 
         if self.keys_pressed["a/d"] == True:
             mult = 0.2
-        else: mult = 1
+        else: mult = 1.6
 
 
         if self.state == PlayerState.GROUNDED: num = max(self.speed[0] / 10, 0.7) * mult
