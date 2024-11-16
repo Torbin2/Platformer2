@@ -47,10 +47,10 @@ class Player:
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:
-            self.speed[0] -= 1
+            self.speed[0] -= 0.4
             self.keys_pressed["a/d"] = True
         elif keys[pygame.K_d]:
-            self.speed[0] += 1
+            self.speed[0] += 0.4
             self.keys_pressed["a/d"] = True
         else:
             self.keys_pressed["a/d"] = False
@@ -112,9 +112,13 @@ class Player:
         
         #friction 
 
-        # if self.keys_pressed["a/d"] = True
-        if self.state == PlayerState.GROUNDED: num = max(self.speed[0] / 10, 0.7)
-        else: num = max(self.speed[0] / 15, 0.4)
+        if self.keys_pressed["a/d"] == True:
+            mult = 0.2
+        else: mult = 1
+
+
+        if self.state == PlayerState.GROUNDED: num = max(self.speed[0] / 10, 0.7) * mult
+        else: num = max(self.speed[0] / 15, 0.4) * mult
         print(num)
         
         if self.speed[0] > 0:
