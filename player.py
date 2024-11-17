@@ -128,24 +128,25 @@ class Player:
             break
 
         
-        #friction 
+        #friction,, 
 
-        if self.keys_pressed["a/d"] == True:
+        #higher if not pressing a/d, (could remove)
+        if self.keys_pressed["a/d"] == True: 
             mult = 0.2
         else: mult = 1.6
 
-
-        if self.state == PlayerState.GROUNDED: num = max(self.speed[0] / 10, 0.7) * mult
-        else: num = max(self.speed[0] / 15, 0.4) * mult
-        print(num)
+        #higher if grounded
+        if self.state == PlayerState.GROUNDED: num = max(abs(self.speed[0]) / 10, 0.7) * mult 
+        else: num = max(abs(self.speed[0]) / 15, 0.4) * mult
         
-        if self.speed[0] > 0:
-            if self.speed[0] - num <0: self.speed[0] = 0
-            else:self.speed[0] -= num
+        #check if speed is positive
+        try:polarity = (self.speed[0] / abs(self.speed[0]))
+        except ZeroDivisionError: polarity = False
 
-        elif self.speed[0] < 0:
-            if self.speed[0] + num >0: self.speed[0] = 0
-            else:self.speed[0] += num
+        #apply speed based on all the above
+        if abs(self.speed[0]) - num < 0: self.speed[0] = 0
+        else: self.speed[0] -= num * polarity
+        
 
         # gravity
         if self.speed[1] * self.gravity < 10: #grav is 1/-1
@@ -154,7 +155,6 @@ class Player:
               
         repeats = math.ceil(abs(self.speed[1] * self.scale) / 10) + 1
         stepy = self.speed[1] * self.scale/ repeats
-        print(repeats, stepy, self.speed)
 
         ground_touch = False
         for i in range(repeats):
