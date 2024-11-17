@@ -1,9 +1,11 @@
 import pygame
 from player import Player
-from blocks import Blocks
+from blocks import Tilemap
 from menu import Menu
 
 pygame.init()
+pygame.display.set_caption('platformer2')
+
 
 open_menu = True
 menu = Menu()
@@ -11,12 +13,16 @@ menu = Menu()
 class Game:
 
     def __init__(self):
+        self.clock = pygame.time.Clock()
 
         self.apply_setting(True)
 
+        
+        self.player = Player(self.screen)
+        self.tilemap = Tilemap(self.screen)
+        
         self.camera = [0, 0]
-        pygame.display.set_caption('game')
-        self.clock = pygame.time.Clock()
+        
         
     def apply_setting(self, new = False):
         self.settings = menu.main()
@@ -25,14 +31,7 @@ class Game:
         self.screen = pygame.display.set_mode((640 * self.scale , 360 * self.scale)) #16:9 ratio
 
         self.fps = 60 + (60 * self.settings["high_fps"])
-        print(self.fps)
 
-        if new:
-            self.player = Player(self.screen)
-            self.blocks = Blocks(self.screen, self.scale)
-        else:
-            self.blocks.update_settings(self.scale)
-        
 
     def run(self):
         while True:
@@ -45,13 +44,13 @@ class Game:
                         self.apply_setting()
 
             self.screen.fill("black")
-            self.player.update(self.blocks.blocks)
+            self.player.update(self.tilemap.tiles)
             
             #draw
             self.camera = self.player.update_camera(self.camera)
             camera = [round(self.camera[i]) for i in range(2)]
 
-            self.blocks.render(camera)
+            self.tilemap.render(camera, self.scale)
             self.player.draw(camera, self.scale)
 
             self.clock.tick(self.fps)

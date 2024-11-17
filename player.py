@@ -2,7 +2,8 @@ import pygame
 import enum
 import math
 
-OFFSETS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0),(1, 1)]
+OFFSETS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0),(1, 1), 
+           (0, 2), (0,-2)] 
 # str = "["
 # for i in range(3):
 #     for j in range(3):
@@ -11,6 +12,7 @@ OFFSETS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0),
 # print(str)
 class PlayerState(enum.Enum):
     GROUNDED = enum.auto()
+    AIR = enum.auto()
 
 class Player:
 
@@ -78,7 +80,7 @@ class Player:
 
         else: self.keys_pressed["r"] = False
 
-    def apply_mov(self, blocks): #and collison
+    def apply_mov(self, blocks): #and collison with blocks
         # left & right
 
         repeats = math.ceil(abs(self.speed[0]) / 10) + 1
@@ -95,7 +97,8 @@ class Player:
             for offset in OFFSETS:
                 tile = (player_pos[0] + offset[0], player_pos[1] + offset[1])
                 if tile in blocks:
-                    blocks_around.append(tile)
+                    if blocks[tile].type == "block":
+                        blocks_around.append(tile)
 
 
             for i in blocks_around:
@@ -116,8 +119,7 @@ class Player:
             break
 
         
-        #friction,, 
-
+        #friction,
         #higher if not pressing a/d, (could remove)
         if self.keys_pressed["a/d"] == True: 
             mult = 0.2
@@ -139,7 +141,6 @@ class Player:
         # gravity
         if self.speed[1] * self.gravity < 10: #grav is 1/-1
             self.speed[1] += 0.7 * self.gravity
-        
               
         repeats = math.ceil(abs(self.speed[1]) / 10) + 1
         stepy = self.speed[1]/ repeats
@@ -148,6 +149,7 @@ class Player:
         for i in range(repeats):
 
             self.rect.centery += stepy
+            ground_check_rect = pygame.Rect(self.rect.x, self.rect.top-9 + (22 * (self.gravity + 1) / 2), 9, 12) #Makes player grounded earlier
 
             player_pos = [self.rect.centerx //10, self.rect.centery // 10]
 
@@ -156,22 +158,23 @@ class Player:
             for offset in OFFSETS:
                 tile = (player_pos[0] + offset[0], player_pos[1] + offset[1])
                 if tile in blocks:
-                    blocks_around.append(tile)
+                    if blocks[tile].type == "block":
+                        blocks_around.append(tile)
 
-
+            self.test_rect = ground_check_rect
+            
             for i in blocks_around:
+                if ground_check_rect.colliderect(blocks[i].rect):
+                    ground_touch = True
+
                 if self.rect.colliderect(blocks[i].rect):
                     if self.speed[1] > 0:
                         self.rect.bottom = blocks[i].rect.top
                         self.speed[1] = 0
-                        if self.gravity == 1:
-                            ground_touch = True
                         break
                     elif self.speed[1] < 0:
                         self.rect.top = blocks[i].rect.bottom
                         self.speed[1] = 0
-                        if self.gravity == -1:
-                            ground_touch = True
                         break
             else:
                 continue
@@ -180,6 +183,8 @@ class Player:
             self.state = PlayerState.GROUNDED
             self.flips = 1
             self.jumps = 2
+        else: self.state = PlayerState.AIR
+        print(self.jumps)
             
     # def update_settings(self):
     #     old_center = self.rect.center
@@ -197,8 +202,15 @@ class Player:
 
     def draw(self, camera, scale):
         drawn_rect = pygame.Rect((self.rect.left - camera[0]) * scale, (self.rect.top - camera[1])* scale, self.rect.width* scale, self.rect.height* scale)
-        pygame.draw.rect(self.screen, 'white', drawn_rect)
+        color = "white"
+        if self.state == PlayerState.AIR:
+            color = "blue"
+        pygame.draw.rect(self.screen, color, drawn_rect)
 
+        #test
+        drawn_rect = pygame.Rect((self.test_rect.left - camera[0]) * scale, (self.test_rect.top - camera[1])* scale, self.test_rect.width* scale, self.test_rect.height* scale)
+        color = ("red")
+        pygame.draw.rect(self.screen, color, drawn_rect)
     def update(self, blocks):
         self.input()
         self.apply_mov(blocks)

@@ -3,7 +3,7 @@ controls: a/d - to move, space - jump, Lshift - flip
 
 ### #TODO: 
 - [ ] move collision to Blocks()
-- [ ] improve block colision at high speed
+- [x] improve block colision at high speed
 - [ ] spike (Cx - Px)² + (Cy - Py)² <= rad
 - [ ] implement spritesheet
 - [ ] level editor
