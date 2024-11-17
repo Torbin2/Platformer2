@@ -19,7 +19,7 @@ class Menu:
         
         self.scale = self.settings["window_size"]
 
-        self.screen = pygame.display.set_mode((480 * self.scale, 270* self.scale))
+        self.screen = pygame.display.set_mode((640 * self.scale, 360* self.scale))#16 *4: 9 * 4
         pygame.display.set_caption('game')
         self.clock = pygame.time.Clock()
         self.font = pygame.font.Font(pygame.font.get_default_font(), 25* self.scale)

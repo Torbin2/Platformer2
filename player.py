@@ -187,22 +187,17 @@ class Player:
     #     self.rect.center = old_center
 
     def update_camera(self, camera):
-        camera[0] *= -1
-        camera[1] *= -1
 
         delta = [camera[0] - (self.rect.centerx -320), camera[1] - (self.rect.centery - 180)]
         camera[0] -= delta[0] / 10
         camera[1] -= delta[1] / 10
 
-        camera[0] *= -1
-        camera[1] *= -1
-        print(camera)
+
         return camera
 
     def draw(self, camera, scale):
-        drawn_rect = pygame.Rect((self.rect.left + camera[0]) * scale, (self.rect.top + camera[1])* scale, self.rect.width* scale, self.rect.height* scale)
+        drawn_rect = pygame.Rect((self.rect.left - camera[0]) * scale, (self.rect.top - camera[1])* scale, self.rect.width* scale, self.rect.height* scale)
         pygame.draw.rect(self.screen, 'white', drawn_rect)
-        print(scale, self.rect)
 
     def update(self, blocks):
         self.input()

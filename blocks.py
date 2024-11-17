@@ -37,7 +37,7 @@ class Blocks:
 
     def render(self, camera):
 
-        onscreen_blocks = [key for key in self.blocks if -1 < key[0] + (camera[0] / 10) < 64 and -1 < key[1] + (camera[1] / 10) < 36]
+        onscreen_blocks = [key for key in self.blocks if -1 < key[0] - (camera[0] / 10) < 64 and -1 < key[1] - (camera[1] / 10) < 36]
 
         for block in onscreen_blocks:
             self.blocks[block].render(self.screen, camera)
@@ -64,6 +64,6 @@ class Block:
         self.color = color
 
     def render(self, screen, camera):
-        pygame.draw.rect(screen, self.color, pygame.Rect((self.rect.left + camera[0]) * scale, (self.rect.top + camera[1])* scale,
+        pygame.draw.rect(screen, self.color, pygame.Rect((self.rect.left - camera[0]) * scale, (self.rect.top - camera[1])* scale,
                                                           self.rect.width* scale, self.rect.height* scale))
-        print(pygame.Rect((self.rect.left + camera[0]) * scale, (self.rect.top + camera[1])* scale,self.rect.width* scale, self.rect.height* scale))
+        
