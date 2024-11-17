@@ -6,8 +6,8 @@ class Tilemap:
 
         self.screen = screen
 
+        # block creation (remove)
 
-# block creation (remove)
         self.tiles = {}
 
         for x in range(120):
@@ -26,7 +26,8 @@ class Tilemap:
         for m in range(10):
             self.tiles[1 + m, 16 + m] = Block(1 + m, 16 + m, color="forestgreen")
             self.tiles[1 + m, 16] = Block(1 + m, 16, color="orange")
-#########################
+
+# ======================================================================================================================
 
     def render(self, camera, scale):
 
@@ -37,13 +38,23 @@ class Tilemap:
 
 class Block:
 
-    def __init__(self,x,y, type_="block", color="grey"):
+    def __init__(self,
+                 x,
+                 y,
+                 type_="block",
+                 color="grey"):
 
-        self.rect = pygame.Rect(x * 10 , y * 10 , 10, 10)
+        self.rect = pygame.Rect(x * 10,
+                                y * 10,
+                                10,
+                                10)
         self.type = type_
         self.color = color
 
     def render(self, screen, camera, scale):
-        pygame.draw.rect(screen, self.color, pygame.Rect((self.rect.left - camera[0]) * scale, (self.rect.top - camera[1])* scale,
-                                                          self.rect.width* scale, self.rect.height* scale))
+        pygame.draw.rect(screen, self.color, pygame.Rect((self.rect.left - camera[0]) * scale,
+                                                         (self.rect.top - camera[1]) * scale,
+                                                          self.rect.width * scale,
+                                                         self.rect.height * scale)
+        )
         

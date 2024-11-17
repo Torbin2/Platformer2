@@ -2,8 +2,7 @@ import pygame
 import enum
 import math
 
-OFFSETS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0),(1, 1), 
-           (0, 2), (0,-2)] 
+OFFSETS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0), (1, 1), (0, 2), (0, -2)]
 # str = "["
 # for i in range(3):
 #     for j in range(3):
@@ -90,7 +89,7 @@ class Player:
             
             self.rect.centerx += stepx
             
-            player_pos = [self.rect.centerx // 10 , self.rect.centery // 10]
+            player_pos = [self.rect.centerx // 10, self.rect.centery // 10]
 
             blocks_around = []
 
@@ -127,12 +126,16 @@ class Player:
         stepy = self.speed[1]/ repeats
 
         ground_touch = False
+
         for i in range(repeats):
 
             self.rect.centery += stepy
-            ground_check_rect = pygame.Rect(self.rect.x, self.rect.top-9 + (22 * (self.gravity + 1) / 2), 9, 12) #Makes player grounded earlier
+            ground_check_rect = pygame.Rect(self.rect.x,
+                                            self.rect.top - 9 + (22 * (self.gravity + 1) / 2),
+                                            9,
+                                            12) # Makes player grounded earlier
 
-            player_pos = [self.rect.centerx //10, self.rect.centery // 10]
+            player_pos = [self.rect.centerx // 10, self.rect.centery // 10]
 
             blocks_around = []
 
@@ -160,6 +163,7 @@ class Player:
             else:
                 continue
             break
+
         if ground_touch:
             self.state = PlayerState.GROUNDED
             self.flips = 1
@@ -184,17 +188,12 @@ class Player:
         #apply speed based on all the above
         if abs(self.speed[0]) - num < 0: self.speed[0] = 0
         else: self.speed[0] -= num * polarity
-        
-
-
-
 
     def update_camera(self, camera):
 
         delta = [camera[0] - (self.rect.centerx -320), camera[1] - (self.rect.centery - 180)]
         camera[0] -= delta[0] / 10
         camera[1] -= delta[1] / 10
-
 
         return camera
 
@@ -207,8 +206,9 @@ class Player:
 
         #test
         drawn_rect = pygame.Rect((self.test_rect.left - camera[0]) * scale, (self.test_rect.top - camera[1])* scale, self.test_rect.width* scale, self.test_rect.height* scale)
-        color = ("red")
+        color = "red"
         pygame.draw.rect(self.screen, color, drawn_rect)
+
     def update(self, blocks):
         self.input()
         self.apply_mov(blocks)
