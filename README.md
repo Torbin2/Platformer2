@@ -2,11 +2,12 @@
 controls: a/d - to move, space - jump, Lshift - flip
 
 ### #TODO: 
-- [ ] move collision to Blocks()
+- [x] move collision to Blocks()
 - [x] improve block colision at high speed
-- [ ] spike (Cx - Px)² + (Cy - Py)² <= rad
-- [ ] implement spritesheet
+- [x] spike (Cx - Px)² + (Cy - Py)² <= rad
 - [ ] level editor
+- [ ] implement spritesheet
+
 
 - [x] rendering/colision optimization
 - [x] camera

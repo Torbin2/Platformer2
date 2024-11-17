@@ -4,12 +4,18 @@ import math
 
 OFFSETS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0),(1, 1), 
            (0, 2), (0,-2)] 
-# str = "["
-# for i in range(3):
-#     for j in range(3):
-#         str += f",({i-1}, {j-1})"
-# str += "]"
-# print(str)
+MORE_OFFSETS= [(-2, -2),(-2, -1),(-2, 0),(-2, 1),(-2, 2),
+               (-1, -2),(-1, -1),(-1, 0),(-1, 1),(-1, 2),
+               (0, -2),(0, -1),(0, 0),(0, 1),(0, 2),
+               (1, -2),(1, -1),(1, 0),(1, 1),(1, 2),
+               (2, -2),(2, -1),(2, 0),(2, 1),(2, 2)]
+
+str = "["
+for i in range(5):
+    for j in range(5):
+        str += f",({i-2}, {j-2})"
+str += "]"
+print(str)
 class PlayerState(enum.Enum):
     GROUNDED = enum.auto()
     AIR = enum.auto()
@@ -33,7 +39,6 @@ class Player:
         self.state = PlayerState.GROUNDED
         self.jumps = 2
         self.flips = 1
-
 
     def input(self):
         keys = pygame.key.get_pressed()
@@ -166,7 +171,6 @@ class Player:
             self.jumps = 2
         else: self.state = PlayerState.AIR
             
-
     def friction(self):
         #higher if not pressing a/d, (could remove)
         if self.keys_pressed["a/d"] == True: 
@@ -185,10 +189,6 @@ class Player:
         if abs(self.speed[0]) - num < 0: self.speed[0] = 0
         else: self.speed[0] -= num * polarity
         
-
-
-
-
     def update_camera(self, camera):
 
         delta = [camera[0] - (self.rect.centerx -320), camera[1] - (self.rect.centery - 180)]
@@ -197,6 +197,24 @@ class Player:
 
 
         return camera
+
+    def collison(self, blocks): #with non-blocks
+        player_pos = [self.rect.centerx // 10 , self.rect.centery // 10]
+
+        tiles_around = []
+
+        for offset in MORE_OFFSETS:
+            tile = (player_pos[0] + offset[0], player_pos[1] + offset[1])
+            if tile in blocks:
+                if blocks[tile].type != "block":
+                    tiles_around.append(tile)
+        
+        for tile in tiles_around:
+            event = blocks[tile].collision_logic(self.rect)
+            match event:
+                case "death":
+                    print(f"hit by {tile}")
+                    self.rect.center = (20, 20)
 
     def draw(self, camera, scale):
         drawn_rect = pygame.Rect((self.rect.left - camera[0]) * scale, (self.rect.top - camera[1])* scale, self.rect.width* scale, self.rect.height* scale)
@@ -213,4 +231,4 @@ class Player:
         self.input()
         self.apply_mov(blocks)
         self.friction()
-        
+        self.collison(blocks)
