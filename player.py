@@ -118,27 +118,8 @@ class Player:
                 continue
             break
 
-        
-        #friction,
-        #higher if not pressing a/d, (could remove)
-        if self.keys_pressed["a/d"] == True: 
-            mult = 0.2
-        else: mult = 1.6
 
-        #higher if grounded
-        if self.state == PlayerState.GROUNDED: num = max(abs(self.speed[0]) / 10, 0.7) * mult 
-        else: num = max(abs(self.speed[0]) / 15, 0.4) * mult
-        
-        #check if speed is positive
-        try:polarity = (self.speed[0] / abs(self.speed[0]))
-        except ZeroDivisionError: polarity = False
-
-        #apply speed based on all the above
-        if abs(self.speed[0]) - num < 0: self.speed[0] = 0
-        else: self.speed[0] -= num * polarity
-        
-
-        # gravity
+        # gravity,
         if self.speed[1] * self.gravity < 10: #grav is 1/-1
             self.speed[1] += 0.7 * self.gravity
               
@@ -184,12 +165,29 @@ class Player:
             self.flips = 1
             self.jumps = 2
         else: self.state = PlayerState.AIR
-        print(self.jumps)
             
-    # def update_settings(self):
-    #     old_center = self.rect.center
-    #     self.rect = pygame.Rect(0 ,0 , 9, 16)
-    #     self.rect.center = old_center
+
+    def friction(self):
+        #higher if not pressing a/d, (could remove)
+        if self.keys_pressed["a/d"] == True: 
+            mult = 0.2
+        else: mult = 1.6
+
+        #higher if grounded
+        if self.state == PlayerState.GROUNDED: num = max(abs(self.speed[0]) / 10, 0.7) * mult 
+        else: num = max(abs(self.speed[0]) / 15, 0.4) * mult
+        
+        #check if speed is positive
+        try:polarity = (self.speed[0] / abs(self.speed[0]))
+        except ZeroDivisionError: polarity = False
+
+        #apply speed based on all the above
+        if abs(self.speed[0]) - num < 0: self.speed[0] = 0
+        else: self.speed[0] -= num * polarity
+        
+
+
+
 
     def update_camera(self, camera):
 
@@ -214,4 +212,5 @@ class Player:
     def update(self, blocks):
         self.input()
         self.apply_mov(blocks)
+        self.friction()
         
