@@ -7,8 +7,8 @@ class Tilemap:
 
         self.screen = screen
 
+        # block creation (remove)
 
-# block creation (remove)
         self.tiles = {}
 
         for x in range(120):
@@ -27,12 +27,8 @@ class Tilemap:
         for m in range(10):
             self.tiles[1 + m, 16 + m] = Block(1 + m, 16 + m, color="forestgreen")
             self.tiles[1 + m, 16] = Block(1 + m, 16, color="orange")
-            self.tiles[10 +m, 10+ m] = Block(10 + m, 10+ m, "cheese_block", "yellow")
-            self.tiles[30, 6 + m *2] = Block(30, 6+ m *2, "circle_spike", "darkgrey") #temp_name
 
-        self.tiles[40, 2] = Block(40, 2, "big_circle_spike", "darkgrey") #temp_name
-
-#########################
+# ======================================================================================================================
 
     def render(self, camera, scale):
 
