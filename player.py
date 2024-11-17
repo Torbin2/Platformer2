@@ -10,12 +10,12 @@ MORE_OFFSETS= [(-2, -2),(-2, -1),(-2, 0),(-2, 1),(-2, 2),
                (1, -2),(1, -1),(1, 0),(1, 1),(1, 2),
                (2, -2),(2, -1),(2, 0),(2, 1),(2, 2)]
 
-str = "["
-for i in range(5):
-    for j in range(5):
-        str += f",({i-2}, {j-2})"
-str += "]"
-print(str)
+# str = "["
+# for i in range(5):
+#     for j in range(5):
+#         str += f",({i-2}, {j-2})"
+# str += "]"
+# print(str)
 class PlayerState(enum.Enum):
     GROUNDED = enum.auto()
     AIR = enum.auto()
@@ -193,6 +193,10 @@ class Player:
         #apply speed based on all the above
         if abs(self.speed[0]) - num < 0: self.speed[0] = 0
         else: self.speed[0] -= num * polarity
+        
+
+
+
 
     def update_camera(self, camera):
 

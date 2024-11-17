@@ -1,5 +1,6 @@
 import pygame
 import json
+from level_editor import LevelEditor
 
 class Menu:
     def __init__(self):
@@ -20,8 +21,9 @@ class Menu:
         self.scale = self.settings["window_size"]
 
         self.screen = pygame.display.set_mode((640 * self.scale, 360* self.scale))#16 *4: 9 * 4
-        pygame.display.set_caption('game')
+        
         self.clock = pygame.time.Clock()
+        
         self.font = pygame.font.Font(pygame.font.get_default_font(), 25* self.scale)
         self.colors = ["#041413", "#25BEB3", "#146963"]
 
@@ -29,7 +31,8 @@ class Menu:
         self.selected = 0
         
 
-        self.options = {"start" : 40,
+        self.options = {"start" : 30,
+                        "level_editor" : 70,
                         "options" : 140,
                         "quit" : 180}
         
@@ -61,7 +64,7 @@ class Menu:
 
     def apply_setting(self):#scuffed
         self.scale = self.settings["window_size"]
-        self.screen = pygame.display.set_mode((480 * self.scale, 270* self.scale))
+        self.screen = pygame.display.set_mode((640 * self.scale, 360* self.scale))
         self.font = pygame.font.Font(pygame.font.get_default_font(), 25* self.scale)
 
     def main(self):
@@ -85,8 +88,10 @@ class Menu:
                             match self.selected:
                                 case 0:
                                     return self.settings
-                                case 1: self.viewing = 'settings'
-                                case 2:
+                                case 1:
+                                    LevelEditor(self.scale).main()
+                                case 2: self.viewing = 'settings'
+                                case 3:
                                     pygame.quit()
                                     exit()
 
