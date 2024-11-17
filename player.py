@@ -2,15 +2,7 @@ import pygame
 import enum
 import math
 
-OFFSETS = [(-1, -1),
-           (-1, 0),
-           (-1, 1),
-           (0, -1),
-           (0, 0),
-           (0, 1),
-           (1, -1),
-           (1, 0),
-           (1, 1)]
+OFFSETS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0),(1, 1)]
 # str = "["
 # for i in range(3):
 #     for j in range(3):
@@ -22,13 +14,9 @@ class PlayerState(enum.Enum):
 
 class Player:
 
-    def __init__(self, screen, scale):
-        self.scale = scale
+    def __init__(self, screen):
         
-        self.rect = pygame.Rect(231 * scale,
-                                109 * scale,
-                                9 * scale,
-                                16 * scale)
+        self.rect = pygame.Rect(231, 109, 9, 16)
         self.speed = [0,0]
         self.screen = screen
 
@@ -93,14 +81,14 @@ class Player:
     def apply_mov(self, blocks): #and collison
         # left & right
 
-        repeats = math.ceil(abs(self.speed[0] * self.scale) / 10) + 1
-        stepx = self.speed[0] * self.scale / repeats
+        repeats = math.ceil(abs(self.speed[0]) / 10) + 1
+        stepx = self.speed[0] / repeats
 
         for i in range(repeats):
             
             self.rect.centerx += stepx
             
-            player_pos = [self.rect.centerx // (10 * self.scale), self.rect.centery // (10*self.scale)]
+            player_pos = [self.rect.centerx // 10 , self.rect.centery // 10]
 
             blocks_around = []
 
@@ -153,15 +141,15 @@ class Player:
             self.speed[1] += 0.7 * self.gravity
         
               
-        repeats = math.ceil(abs(self.speed[1] * self.scale) / 10) + 1
-        stepy = self.speed[1] * self.scale/ repeats
+        repeats = math.ceil(abs(self.speed[1]) / 10) + 1
+        stepy = self.speed[1]/ repeats
 
         ground_touch = False
         for i in range(repeats):
 
             self.rect.centery += stepy
 
-            player_pos = [self.rect.centerx //(10 *self.scale), self.rect.centery // (10*self.scale)]
+            player_pos = [self.rect.centerx //10, self.rect.centery // 10]
 
             blocks_around = []
 
@@ -193,29 +181,28 @@ class Player:
             self.flips = 1
             self.jumps = 2
             
-    def update_settings(self, scale):
-        old_center = self.rect.center # / scale 
-        self.scale = scale           
-        self.rect = pygame.Rect(0 ,0 , 9 * scale, 16 * scale)
-        self.rect.center = old_center # * scale
+    # def update_settings(self):
+    #     old_center = self.rect.center
+    #     self.rect = pygame.Rect(0 ,0 , 9, 16)
+    #     self.rect.center = old_center
 
     def update_camera(self, camera):
         camera[0] *= -1
         camera[1] *= -1
 
-        delta = [camera[0] - (self.rect.centerx - self.scale * 240), camera[1] - (self.rect.centery - self.scale * 135)]
+        delta = [camera[0] - (self.rect.centerx -320), camera[1] - (self.rect.centery - 180)]
         camera[0] -= delta[0] / 10
         camera[1] -= delta[1] / 10
 
         camera[0] *= -1
         camera[1] *= -1
-
+        print(camera)
         return camera
 
-    def draw(self, camera):
-        drawn_rect = pygame.Rect(self.rect.left + camera[0], self.rect.top + camera[1], self.rect.width, self.rect.height)
-
+    def draw(self, camera, scale):
+        drawn_rect = pygame.Rect((self.rect.left + camera[0]) * scale, (self.rect.top + camera[1])* scale, self.rect.width* scale, self.rect.height* scale)
         pygame.draw.rect(self.screen, 'white', drawn_rect)
+        print(scale, self.rect)
 
     def update(self, blocks):
         self.input()

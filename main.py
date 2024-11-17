@@ -22,17 +22,15 @@ class Game:
         self.settings = menu.main()
 
         self.scale = self.settings["window_size"]
-        self.screen = pygame.display.set_mode((480 * self.scale,
-                                               270 * self.scale)) #16:9 ratio
+        self.screen = pygame.display.set_mode((640 * self.scale , 360 * self.scale)) #16:9 ratio
 
         self.fps = 60 + (60 * self.settings["high_fps"])
         print(self.fps)
 
         if new:
-            self.player = Player(self.screen, self.scale)
+            self.player = Player(self.screen)
             self.blocks = Blocks(self.screen, self.scale)
         else:
-            self.player.update_settings(self.scale)
             self.blocks.update_settings(self.scale)
         
 
@@ -54,7 +52,7 @@ class Game:
             camera = [round(self.camera[i]) for i in range(2)]
 
             self.blocks.render(camera)
-            self.player.draw(camera)
+            self.player.draw(camera, self.scale)
 
             self.clock.tick(self.fps)
             pygame.display.update()
