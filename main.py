@@ -44,7 +44,7 @@ class Game:
                         self.apply_setting()
 
             self.screen.fill("black")
-            self.player.update(self.tilemap.tiles)
+            self.player.update(self.tilemap.tiles, self.tilemap.blocks)
             
             #draw
             self.camera = self.player.update_camera(self.camera)

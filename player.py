@@ -102,8 +102,7 @@ class Player:
             for offset in OFFSETS:
                 tile = (player_pos[0] + offset[0], player_pos[1] + offset[1])
                 if tile in blocks:
-                    if blocks[tile].type == "block":
-                        blocks_around.append(tile)
+                    blocks_around.append(tile)
 
 
             for i in blocks_around:
@@ -138,8 +137,7 @@ class Player:
             self.rect.centery += stepy
             ground_check_rect = pygame.Rect(self.rect.x,
                                             self.rect.top - 9 + (22 * (self.gravity + 1) / 2),
-                                            9,
-                                            12) # Makes player grounded earlier
+                                            9, 12) # Makes player grounded earlier
 
             player_pos = [self.rect.centerx // 10, self.rect.centery // 10]
 
@@ -148,8 +146,7 @@ class Player:
             for offset in OFFSETS:
                 tile = (player_pos[0] + offset[0], player_pos[1] + offset[1])
                 if tile in blocks:
-                    if blocks[tile].type == "block":
-                        blocks_around.append(tile)
+                    blocks_around.append(tile)
 
             self.test_rect = ground_check_rect
 
@@ -206,19 +203,19 @@ class Player:
 
         return camera
 
-    def collison(self, blocks): #with non-blocks
+    def collison(self, tiles): #with non-blocks
         player_pos = [self.rect.centerx // 10 , self.rect.centery // 10]
 
         tiles_around = []
 
         for offset in MORE_OFFSETS:
             tile = (player_pos[0] + offset[0], player_pos[1] + offset[1])
-            if tile in blocks:
-                if blocks[tile].type != "block":
+            if tile in tiles:
+                if tiles[tile].type != "block":
                     tiles_around.append(tile)
 
         for tile in tiles_around:
-            event = blocks[tile].collision_logic(self.rect)
+            event = tiles[tile].collision_logic(self.rect)
             match event:
                 case "death":
                     print(f"hit by {tile}")
@@ -236,8 +233,8 @@ class Player:
         color = "red"
         pygame.draw.rect(self.screen, color, drawn_rect)
 
-    def update(self, blocks):
+    def update(self, tiles, blocks):
         self.input()
         self.apply_mov(blocks)
         self.friction()
-        self.collison(blocks)
+        self.collison(tiles)
