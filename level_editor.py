@@ -22,3 +22,6 @@ class LevelEditor:
 
             self.clock.tick(60)
             pygame.display.update()
+
+#FORMAT IN JSON:{"xy" : [IsBlock?(bool) ,x ,y , color, type],
+#                "xy" : [IsBlock?(bool) ,x ,y , color, type], }
