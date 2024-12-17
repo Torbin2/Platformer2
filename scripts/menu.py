@@ -1,6 +1,6 @@
 import pygame
 import json
-from level_editor import LevelEditor
+from scripts.level_editor import LevelEditor
 
 class Menu:
     def __init__(self):
