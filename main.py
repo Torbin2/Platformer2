@@ -2,6 +2,7 @@ import pygame
 from player import Player
 from blocks import Tilemap
 from menu import Menu
+from load_images import load_image, load_images
 
 pygame.init()
 pygame.display.set_caption('platformer2')
@@ -17,11 +18,17 @@ class Game:
 
         self.apply_setting(True)
 
-        
         self.player = Player(self.screen)
         self.tilemap = Tilemap(self.screen)
         
         self.camera = [0, 0]
+
+        self.images = {
+            "snake" : load_image("snake.png"),
+            "blocks" : load_images("tiles/"),
+        }
+
+
         
         
     def apply_setting(self, new = False):
@@ -50,7 +57,7 @@ class Game:
             self.camera = self.player.update_camera(self.camera)
             camera = [round(self.camera[i]) for i in range(2)]
 
-            self.tilemap.render(camera, self.scale)
+            self.tilemap.render(camera, self.scale, self.images)
             self.player.draw(camera, self.scale)
 
             self.clock.tick(self.fps)

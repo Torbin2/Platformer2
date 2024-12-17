@@ -1,67 +1,48 @@
 import pygame
 from math import sqrt
 import json
+from enum import Enum
 
-#FORMAT IN JSON: {"x;y" : [IsBlock?(bool) ,x ,y, type],
-#                 "x;y" : [IsBlock?(bool),x ,y , type]}
+def convert_level(pos: list[int, int], class_type: str, variant: str, blocks:dict, tiles : dict):
+    match class_type:
+        case "block":
+            blocks[(pos[0], pos[1])] = Block(pos[0], pos[1], variant)
+        case "spike":
+            tiles[(pos[0], pos[1])] = Spike(pos[0], pos[1], variant)
 
 class Tilemap:
     
     def __init__(self, screen):
 
         self.screen = screen
-        
-        # block creation (remove)
+  
+        with open("levels.json" , "r") as f:
+            level_data : dict = json.load(f)
+
         self.tiles = {}
-        self.tiles["1;1"] = [True, 1, 1, "default"]
-        self.tiles["2;2"] = [True, 2, 2, "default"]
-        # for x in range(120):
-        #     screen is (64, 36)
-        #     self.tiles[f"{x, 0}"] = Block(x, 0)
-            # self.tiles[str(x + 120, 0)] = Block(x + 120, 0)
-            # self.tiles[str(x + 180, 0)] = Block(x + 180, 0)
-            # self.tiles[str(0, x)] = Block(0, x)
-            # self.tiles[str(x, 26)] = Block(x, 26)
+        self.blocks = {}
+        for num in level_data:
+            data = level_data[num]
+            convert_level(data["pos"], data["type"], data["variant"], self.blocks, self.tiles)
 
-        # self.tiles[str(20, 15)] = Block(20, 15, color="red")
-        # self.tiles[str(21, 15)] = Block(21, 15, color="green")
 
-        # self.tiles[str(23, 16)] = Block(23, 16, color="skyblue")
 
-        # for m in range(10):
-        #     self.tiles[str(1 + m, 16 + m)] = Block(1 + m, 16 + m, color="forestgreen")
-        #     self.tiles[str(1 + m, 16)] = Block(1 + m, 16, color="orange")
-        #     self.tiles[str(10+m, 10+m)] = Spike(10+m, 10+m,"cheese_block" ,"yellow")
-        #     self.tiles[str(35, 6 + m*2)] = Spike(35, 6 + m*2, "circle_spike", "yellow" )
-        # self.tiles[str(45,  10)] = Spike(45, 10, "big_circle_spike", "yellow" )
-
-        with open("levels.json" , "w") as f:
-            json.dump(self.tiles, f)
-
-        self.blocks = {} #because block collision is different
-        for i in self.tiles:
-            if isinstance(self.tiles[i], Block):
-                self.blocks[i] = (self.tiles[i])
-
-        for i in self.blocks:
-            self.tiles.pop(i)
         
 # ======================================================================================================================
 
-    def render(self, camera, scale):
+    def render(self, camera, scale, images:dict):
 
         onscreen_blocks = [key for key in self.blocks if -1 < key[0] - (camera[0] / 10) < 64 and -1 < key[1] - (camera[1] / 10) < 36]
         onscreen_tiles = [key for key in self.tiles if -1 < key[0] - (camera[0] / 10) < 64 and -1 < key[1] - (camera[1] / 10) < 36]
 
         for block in onscreen_blocks:
-            self.blocks[block].render(self.screen, camera, scale)
+            self.blocks[block].render(self.screen, camera, scale, images["blocks"])
         for tile in onscreen_tiles:
-            self.tiles[tile].render(self.screen, camera, scale)
+            self.tiles[tile].render(self.screen, camera, scale, images["snake"])
 
         
-
 class Spike:
-    def __init__(self, x, y, type_="block", color="grey"):
+    def __init__(self, x, y, type_="cheese_block", color="yellow"):
         
         self.type = type_
         self.shape = self.check_shape(self.type)
@@ -69,7 +50,7 @@ class Spike:
         
         self.color = color
 
-        if self.type in ("cheese_block"):
+        if self.shape == "square":
             self.rect = pygame.Rect(x * 10 , y * 10 , 10, 10)
         
         elif self.type == "circle_spike":
@@ -79,7 +60,7 @@ class Spike:
 
         #if radius larger than 2 tile, colision doesn't function
     def check_shape(self, type):
-        if type in ("cheese_block"):
+        if type in ("cheese_block" ,"snake"):
             return "square"
         
         if type in ("circle_spike", "big_circle_spike"):
@@ -97,23 +78,24 @@ class Spike:
                 if sqrt((self.circ[0] - player_rect.centerx) ** 2 + (self.circ[1] - player_rect.centery)**2) <= self.circ[2]: 
                     return "death" #only hits if playercenter is in range of circle, may change this
         
-        
-
-    def render(self, screen, camera, scale):
+    def render(self, screen, camera, scale, image):
         if self.shape == "square":
             draw_rect = pygame.Rect((self.rect.left - camera[0]) * scale, (self.rect.top - camera[1])* scale, self.rect.width* scale, self.rect.height* scale)
             pygame.draw.rect(screen, self.color, draw_rect)
+            screen.blit(pygame.transform.scale(image, (draw_rect.width, draw_rect.height )), draw_rect.topleft)
         
         elif self.shape == "circle":
             pygame.draw.circle(screen, self.color, ((self.circ[0]- camera[0]) * scale, (self.circ[1]- camera[1]) * scale), self.circ[2] * scale)
-
+        print(self.shape, self.type)
 
 class Block:
-    def __init__(self, x, y, color="grey", _type = "default"):
-        self.color = color
+    def __init__(self, x, y, image_num:str):
+        self.image_num = int(image_num) #0-9
         self.rect = pygame.Rect(x * 10 , y * 10 , 10, 10)
-        self.type = _type
 
-    def render(self, screen, camera, scale):
+    def render(self, screen, camera, scale, images):
         draw_rect = pygame.Rect((self.rect.left - camera[0]) * scale, (self.rect.top - camera[1])* scale, self.rect.width* scale, self.rect.height* scale)
-        pygame.draw.rect(screen, self.color, draw_rect)
+        
+        screen.blit(pygame.transform.scale(images[self.image_num - 1], (draw_rect.width, draw_rect.height )), draw_rect.topleft) #-1,because 0-index
+
+        

@@ -34,7 +34,7 @@ class Player:
                              "a/d": False,
                              "r": False}
 
-        self.gravity = 1 #1 is down, -1 is up
+        self.gravity = -1 #1 is down, -1 is up
 
         self.state = PlayerState.GROUNDED
         self.jumps = 2
