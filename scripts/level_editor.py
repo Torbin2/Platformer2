@@ -39,7 +39,7 @@ class LevelEditor:
             self.tiles[str(i+400)] = {"pos": [12, i + 5], "type" : "spike", "variant" : "snake"}
 
 
-        with open("levels.json" , "w") as f:
+        with open("json_files/levels.json" , "w") as f:
             json.dump(self.tiles, f)
 #FORMAT IN JSON:{"xy" : [IsBlock?(bool) ,x ,y , color, type],
 #                "xy" : [IsBlock?(bool) ,x ,y , color, type], }

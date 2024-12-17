@@ -2,11 +2,12 @@ import pygame
 import json
 from scripts.level_editor import LevelEditor
 
+FONT_SIZE = 35
 class Menu:
     def __init__(self):
 
         try:
-            with open("settings.json", "r") as f:
+            with open("json_files/settings.json", "r") as f:
                 self.settings = json.load(f)
         except FileNotFoundError:
             self.settings = {
@@ -15,7 +16,7 @@ class Menu:
                 "sound": False,
                 "back": ""
             }
-            with open("settings.json", "w") as f:
+            with open("json_files/settings.json", "w") as f:
                 json.dump(self.settings, f)
         
         self.scale = self.settings["window_size"]
@@ -24,17 +25,17 @@ class Menu:
         
         self.clock = pygame.time.Clock()
         
-        self.font = pygame.font.Font(pygame.font.get_default_font(), 25* self.scale)
+        self.font = pygame.font.Font(pygame.font.get_default_font(), FONT_SIZE* self.scale)
         self.colors = ["#041413", "#25BEB3", "#146963"]
 
         self.viewing = "main"
         self.selected = 0
         
 
-        self.options = {"start" : 30,
-                        "level_editor" : 70,
-                        "options" : 140,
-                        "quit" : 180}
+        self.options = {"start" : 60,
+                        "level_editor" : 110,
+                        "options" : 210,
+                        "quit" : 260}
         
 
 
@@ -54,18 +55,18 @@ class Menu:
                 else: fill = self.colors[2]
                 #setting name
                 text = self.font.render(key, 1, (fill))
-                rect = text.get_rect(topleft = (4 * self.scale , num * 24 * self.scale))
+                rect = text.get_rect(topleft = (10 * self.scale , num * FONT_SIZE * self.scale))
                 self.screen.blit(text, rect)  
 
                 #setting value
                 text = self.font.render(str(self.settings[key]), 1, (fill))
-                rect = text.get_rect(topright = (self.screen.get_width() - 4 * self.scale, num * 24 * self.scale))
+                rect = text.get_rect(topright = (self.screen.get_width() - 10 * self.scale, num * FONT_SIZE * self.scale))
                 self.screen.blit(text, rect)  
 
     def apply_setting(self):#scuffed
         self.scale = self.settings["window_size"]
         self.screen = pygame.display.set_mode((640 * self.scale, 360* self.scale))
-        self.font = pygame.font.Font(pygame.font.get_default_font(), 25* self.scale)
+        self.font = pygame.font.Font(pygame.font.get_default_font(), FONT_SIZE* self.scale)
 
     def main(self):
         while True:
@@ -112,7 +113,7 @@ class Menu:
                                     self.selected = 0
                                     self.apply_setting()
                                     
-                                    with open('settings.json', "w") as f:
+                                    with open('json_files/settings.json', "w") as f:
                                         json.dump(self.settings, f)
 
             self.screen.fill(self.colors[0])

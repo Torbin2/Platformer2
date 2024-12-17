@@ -16,7 +16,7 @@ class Tilemap:
 
         self.screen = screen
   
-        with open("levels.json" , "r") as f:
+        with open("json_files/levels.json" , "r") as f:
             level_data : dict = json.load(f)
 
         self.tiles = {}
@@ -86,7 +86,6 @@ class Spike:
         
         elif self.shape == "circle":
             pygame.draw.circle(screen, self.color, ((self.circ[0]- camera[0]) * scale, (self.circ[1]- camera[1]) * scale), self.circ[2] * scale)
-        print(self.shape, self.type)
 
 class Block:
     def __init__(self, x, y, image_num:str):
