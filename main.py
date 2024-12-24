@@ -26,6 +26,7 @@ class Game:
         self.images = {
             "snake" : load_image("snake.png"),
             "blocks" : load_images("tiles/"),
+            "spike_cube" : load_image("spike_cube.png")
         }
 
 

@@ -5,6 +5,6 @@ controls: a/d - to move, space - jump, Lshift - flip
 - [ ] level editor
 - [ ] implement spritesheet
 - [x] block class template
-- [ ] make levels notation json compatible
+- [x] make levels notation json compatible
 
 

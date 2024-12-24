@@ -60,7 +60,7 @@ class Spike:
 
         #if radius larger than 2 tile, colision doesn't function
     def check_shape(self, type):
-        if type in ("cheese_block" ,"snake"):
+        if type in ("spike_cube" ,"snake"):
             return "square"
         
         if type in ("circle_spike", "big_circle_spike"):
