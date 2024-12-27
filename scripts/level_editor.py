@@ -1,6 +1,7 @@
 import pygame
 import json
 from scripts.load_images import load_images, load_image
+from scripts.enums import Type, BlockVariants
 
 class LevelEditor:
     def __init__(self, scale):
@@ -9,23 +10,31 @@ class LevelEditor:
         self.screen = pygame.display.set_mode((640 * self.scale, 360* self.scale))#16 *4: 9 * 4
         self.camera = [0, 0]
         
-        self.selected = {1 : "block",
-                         2 : "spike_cube",
-                         3 : "snake"}
-        self.bar = 0 #for blocks_num >9
+        self.selected = {1 : Type.BLOCK,
+                         2 : Type.SPIKE_CUBE,
+                         3 : Type.SPIKE_SNAKE}
+        self.bar = 0
         self.key_press = 1
 
 
         with open("json_files/levels.json" , "r") as f:
             self.tilemap : dict = json.load(f)
-        self.tilenumber = max(tuple(map(int, [i for i in self.tilemap]))) + 1
+
+        if self.tilemap != {}:
+            self.tilenumber = max(tuple(map(int, [i for i in self.tilemap]))) + 1
+            for i in self.tilemap:
+                self.tilemap[i]["type"] = eval(self.tilemap[i]["type"])
+        else: self.tilenumber = 0
+
         print(self.tilenumber)
 
         self.images = {
-            "spike_cube" : load_image("spike_cube.png"),
-            "blocks" : load_images("tiles/"),
-            "snake" : load_image("snake.png"),
+            Type.SPIKE_CUBE : load_image("spike_cube.png"),
+            Type.BLOCK : load_images("tiles/"),
+            Type.SPIKE_SNAKE : load_image("snake.png"),
         }
+
+        
 
         self.directions = {
             pygame.K_w : [0, -1, False],
@@ -39,40 +48,47 @@ class LevelEditor:
 
         #self.scale_to_grid = lambda x: [x[0] // (10 * scale), x[1] // (10 * scale)]
     
-    def render(self, pos: list[int, int], tile_type : str, variant: str):
-        if tile_type == "block":
-            draw_rect = pygame.Rect((pos[0] * 10 - self.camera[0]) * self.scale, (pos[1] * 10 - self.camera[1])* self.scale, 10* self.scale, 10* self.scale)
-            self.screen.blit(pygame.transform.scale(self.images["blocks"][int(variant)], (draw_rect.width, draw_rect.height )), draw_rect.topleft)
-        elif tile_type in ("spike_cube"):
-            draw_rect = pygame.Rect((pos[0] * 10- self.camera[0]) * self.scale, (pos[1] * 10- self.camera[1])* self.scale, 10* self.scale, 10* self.scale)
-            self.screen.blit(pygame.transform.scale(self.images[variant], (draw_rect.width, draw_rect.height )), draw_rect.topleft)
+    def render(self, tile):
+        if tile["type"] == Type.BLOCK:
+            draw_rect = pygame.Rect((tile["pos"][0] * 10 - self.camera[0]) * self.scale, (tile["pos"][1] * 10 - self.camera[1])* self.scale, 10* self.scale, 10* self.scale)
+            self.screen.blit(pygame.transform.scale(self.images[tile["type"]][int(tile["variant"])], (draw_rect.width, draw_rect.height )), draw_rect.topleft)
+        
+        elif tile["type"] in Type.SPIKES:
+            draw_rect = pygame.Rect((tile["pos"][0] * 10- self.camera[0]) * self.scale, (tile["pos"][1] * 10- self.camera[1])* self.scale,
+                                     10* self.scale, 10* self.scale)
+            self.screen.blit(pygame.transform.scale(self.images[tile["type"]], (draw_rect.width, draw_rect.height )), draw_rect.topleft)
 
     def quit(self):
+        for i in self.tilemap:
+            self.tilemap[i]["type"] = str(self.tilemap[i]["type"])
+
         with open("json_files/levels.json" , "w") as f:
             json.dump(self.tilemap, f)
         self.run = False
 
-    def create_tile(self, _pos: list[int, int], type: str, remove: bool):
+        self.tilemap = {}
+
+    def create_tile(self, _pos: list[int, int], type: Type, remove: bool):
         pos = [(_pos[0] + self.camera[0] * self.scale) // (10 * self.scale), (_pos[1] + self.camera[1]* self.scale) // (10 * self.scale)]
         
         tiles_on_pos = [x for x in self.tilemap if self.tilemap[x]["pos"] == pos]
         if remove: 
             for i in tiles_on_pos:
-                if self.tilemap[i]["type"] == "block":
+                if self.tilemap[i]["type"] == Type.BLOCK:
                     self.update_variants(self.tilemap[i]["pos"], add = False)
                 self.tilemap.pop(i)
             return
         elif tiles_on_pos:#tile exists already
             for i in tiles_on_pos:
-                if self.tilemap[i]["type"] == "block":
+                if self.tilemap[i]["type"] == Type.BLOCK:
                     self.update_variants(self.tilemap[i]["pos"], add = False)
                 self.tilemap.pop(i)
         
-        if type == "block": 
+        if type == Type.BLOCK: 
             self.tilemap[self.tilenumber] = {"pos": pos, "type": type, "variant": 1}
             self.update_variants(pos, add = True)
-        if type in ("spike_cube", "snake"):
-            self.tilemap[self.tilenumber] = {"pos": pos, "type": "spike", "variant": type}
+        if type in Type.SPIKES:
+            self.tilemap[self.tilenumber] = {"pos": pos, "type": type}
         self.tilenumber += 1
 
     def update_variants(self, new_block_pos, add: bool = True): #TODO
@@ -114,12 +130,11 @@ class LevelEditor:
             self.screen.fill("black")
 
             for i in self.tilemap:
-                tile = self.tilemap[i]
-                self.render(tile["pos"], tile["type"], tile["variant"])
+                self.render(self.tilemap[i])
 
             mouse_press = pygame.mouse.get_pressed()
             if mouse_press[0] or mouse_press[2]:
-                x = self.selected[self.key_press] if self.key_press in self.selected else "block"
+                x = self.selected[self.key_press] if self.key_press in self.selected else Type.BLOCK
                 self.create_tile(pygame.mouse.get_pos(), x, mouse_press[2])
 
             self.clock.tick(60)
@@ -130,7 +145,7 @@ class LevelEditor:
         for i in range(100):
 
         
-            self.tiles[str(i)] = {"pos": [i, 0], "type" : "block", "variant" : "3"}
+            self.tiles[str(i)] = {"pos": [i, 0], "type" : Type.BLOCK, "variant" : "3"}
             self.tiles[str(i+100)] = {"pos": [i, 40], "type" : "block", "variant" : "1"}
             self.tiles[str(i+200)] = {"pos": [0, i], "type" : "block", "variant" : "2"}
             self.tiles[str(i+300)] = {"pos": [60, i], "type" : "block", "variant" : "4"}

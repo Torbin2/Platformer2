@@ -3,6 +3,7 @@ from scripts.player import Player
 from scripts.blocks import Tilemap
 from scripts.menu import Menu
 from scripts.load_images import load_image, load_images
+from scripts.enums import Type
 
 pygame.init()
 pygame.display.set_caption('platformer2')
@@ -16,7 +17,7 @@ class Game:
     def __init__(self):
         self.clock = pygame.time.Clock()
 
-        self.apply_setting(True)
+        self.apply_setting()
 
         self.player = Player(self.screen)
         self.tilemap = Tilemap(self.screen)
@@ -24,15 +25,13 @@ class Game:
         self.camera = [0, 0]
 
         self.images = {
-            "snake" : load_image("snake.png"),
-            "blocks" : load_images("tiles/"),
-            "spike_cube" : load_image("spike_cube.png")
+            Type.SPIKE_SNAKE : load_image("snake.png"),
+            Type.BLOCK : load_images("tiles/"),
+            Type.SPIKE_CUBE : load_image("spike_cube.png")
         }
 
 
-        
-        
-    def apply_setting(self, new = False):
+    def apply_setting(self):
         self.settings = menu.main()
 
         self.scale = self.settings["window_size"]
@@ -50,6 +49,8 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.apply_setting()
+                    if event.key == pygame.K_r:
+                        self.tilemap.reload_level()
 
             self.screen.fill("black")
             self.player.update(self.tilemap.tiles, self.tilemap.blocks)

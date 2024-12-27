@@ -1,6 +1,6 @@
 import pygame
-import enum
-import math
+from scripts.enums import Type, PlayerState
+from math import ceil
 
 OFFSETS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0),(1, 1),
            (0, 2), (0,-2)]
@@ -16,9 +16,7 @@ MORE_OFFSETS= [(-2, -2),(-2, -1),(-2, 0),(-2, 1),(-2, 2),
 #         str += f",({i-2}, {j-2})"
 # str += "]"
 # print(str)
-class PlayerState(enum.Enum):
-    GROUNDED = enum.auto()
-    AIR = enum.auto()
+
 
 class Player:
 
@@ -88,7 +86,7 @@ class Player:
     def apply_mov(self, blocks): #and collison with blocks
         # left & right
 
-        repeats = math.ceil(abs(self.speed[0]) / 10) + 1
+        repeats = ceil(abs(self.speed[0]) / 10) + 1
         stepx = self.speed[0] / repeats
 
         for i in range(repeats):
@@ -127,7 +125,7 @@ class Player:
         if self.speed[1] * self.gravity < 10: #grav is 1/-1
             self.speed[1] += 0.7 * self.gravity
               
-        repeats = math.ceil(abs(self.speed[1]) / 10) + 1
+        repeats = ceil(abs(self.speed[1]) / 10) + 1
         stepy = self.speed[1]/ repeats
 
         ground_touch = False
