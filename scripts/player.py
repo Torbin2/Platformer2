@@ -10,12 +10,7 @@ MORE_OFFSETS= [(-2, -2),(-2, -1),(-2, 0),(-2, 1),(-2, 2),
                (1, -2),(1, -1),(1, 0),(1, 1),(1, 2),
                (2, -2),(2, -1),(2, 0),(2, 1),(2, 2)]
 
-# str = "["
-# for i in range(5):
-#     for j in range(5):
-#         str += f",({i-2}, {j-2})"
-# str += "]"
-# print(str)
+PYSICS_MOD = 0.75
 
 
 class Player:
@@ -42,10 +37,10 @@ class Player:
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:
-            self.speed[0] -= 0.4
+            self.speed[0] -= 0.4 * PYSICS_MOD
             self.keys_pressed["a/d"] = True
         elif keys[pygame.K_d]:
-            self.speed[0] += 0.4
+            self.speed[0] += 0.4 * PYSICS_MOD
             self.keys_pressed["a/d"] = True
         else:
             self.keys_pressed["a/d"] = False
@@ -56,8 +51,8 @@ class Player:
                     self.jumps -= 1
 
                     if self.gravity == 1:
-                        self.speed[1] = -12
-                    else: self.speed[1] = +12
+                        self.speed[1] = -12 * PYSICS_MOD
+                    else: self.speed[1] = +12 * PYSICS_MOD
                 
                 self.keys_pressed["space"] = True 
         else: self.keys_pressed["space"] = False
@@ -107,13 +102,13 @@ class Player:
                 if self.rect.colliderect(blocks[i].rect):
                     if self.speed[0] > 0: 
                         self.rect.right = blocks[i].rect.left
-                        self.speed[0] -= 4
+                        self.speed[0] -= 4 * PYSICS_MOD
                         if self.speed[0] < 0: self.speed[0] = 0 #in case of direction shift by collision
                         break
 
                     elif self.speed[0] < 0:
                         self.rect.left = blocks[i].rect.right
-                        self.speed[0] += 4
+                        self.speed[0] += 4 * PYSICS_MOD
                         if self.speed[0] > 0: self.speed[0] = 0#in case of direction shift by collision
                         break
             else:
@@ -123,7 +118,7 @@ class Player:
 
         # gravity,
         if self.speed[1] * self.gravity < 10: #grav is 1/-1
-            self.speed[1] += 0.7 * self.gravity
+            self.speed[1] += 0.7 * self.gravity * PYSICS_MOD
               
         repeats = ceil(abs(self.speed[1]) / 10) + 1
         stepy = self.speed[1]/ repeats
@@ -174,12 +169,12 @@ class Player:
     def friction(self):
         #higher if not pressing a/d, (could remove)
         if self.keys_pressed["a/d"] == True:
-            mult = 0.2
-        else: mult = 1.6
+            mult = 0.2 * PYSICS_MOD
+        else: mult = 1.6 * PYSICS_MOD
 
         #higher if grounded
         if self.state == PlayerState.GROUNDED: num = max(abs(self.speed[0]) / 10, 0.7) * mult
-        else: num = max(abs(self.speed[0]) / 15, 0.4) * mult
+        else: num = max(abs(self.speed[0]) / 15, 0.4) * mult 
 
         #check if speed is positive
         try:polarity = (self.speed[0] / abs(self.speed[0]))
