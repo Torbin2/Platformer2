@@ -38,6 +38,7 @@ class Game:
         self.screen = pygame.display.set_mode((640 * self.scale , 360 * self.scale)) #16:9 ratio
 
         self.fps = 60 + (60 * self.settings["high_fps"])
+        self.use_textures:bool = self.settings["textures"]
 
 
     def run(self):
@@ -59,7 +60,7 @@ class Game:
             self.camera = self.player.update_camera(self.camera)
             camera = [round(self.camera[i]) for i in range(2)]
 
-            self.tilemap.render(camera, self.scale, self.images)
+            self.tilemap.render(camera, self.scale, self.images, self.use_textures)
             self.player.draw(camera, self.scale)
 
             self.clock.tick(self.fps)

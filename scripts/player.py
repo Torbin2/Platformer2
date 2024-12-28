@@ -4,11 +4,7 @@ from math import ceil
 
 OFFSETS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0),(1, 1),
            (0, 2), (0,-2)]
-MORE_OFFSETS= [(-2, -2),(-2, -1),(-2, 0),(-2, 1),(-2, 2),
-               (-1, -2),(-1, -1),(-1, 0),(-1, 1),(-1, 2),
-               (0, -2),(0, -1),(0, 0),(0, 1),(0, 2),
-               (1, -2),(1, -1),(1, 0),(1, 1),(1, 2),
-               (2, -2),(2, -1),(2, 0),(2, 1),(2, 2)]
+
 
 PYSICS_MOD = 1
 SPEED_MOD = 1
@@ -200,7 +196,7 @@ class Player:
 
         tiles_around = []
 
-        for offset in MORE_OFFSETS:
+        for offset in OFFSETS:
             tile = (player_pos[0] + offset[0], player_pos[1] + offset[1])
             if tile in tiles:
                 if tiles[tile].type != "block":

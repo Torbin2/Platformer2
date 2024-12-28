@@ -12,6 +12,7 @@ class Menu:
         except FileNotFoundError:
             self.settings = {
                 "window_size": 2,
+                "textures" : False,
                 "high_fps": False,
                 "sound": False,
                 "back": ""
@@ -49,7 +50,7 @@ class Menu:
 
                 self.screen.blit(text, rect)    
         
-        elif self.viewing == 'settings':
+        elif self.viewing == 'settings': 
             for num, key in enumerate(self.settings):
                 if num == self.selected: fill = self.colors[1]
                 else: fill = self.colors[2]
@@ -63,7 +64,7 @@ class Menu:
                 rect = text.get_rect(topright = (self.screen.get_width() - 10 * self.scale, num * FONT_SIZE * self.scale))
                 self.screen.blit(text, rect)  
 
-    def apply_setting(self):#scuffed
+    def apply_setting(self):
         self.scale = self.settings["window_size"]
         self.screen = pygame.display.set_mode((640 * self.scale, 360* self.scale))
         self.font = pygame.font.Font(pygame.font.get_default_font(), FONT_SIZE* self.scale)
@@ -97,24 +98,27 @@ class Menu:
                                     exit()
 
                         elif self.viewing == 'settings':
+                            if "textures" not in self.settings:
+                                self.settings["textures"] = True
                             match self.selected:
                                 case 0: 
                                     if self.settings["window_size"] >= 9: self.settings["window_size"] = 1 
                                     else: self.settings["window_size"] += 1
-
-                                case 1: 
+                                case 1: self.settings["textures"] = not self.settings["textures"]
+                                case 2: 
                                     self.settings["high_fps"] = not self.settings["high_fps"]
                                 
-                                case 2: 
+                                case 3: 
                                     self.settings["sound"] = not self.settings["sound"]
 
-                                case 3: 
+                                case 4: 
                                     self.viewing = 'main'
                                     self.selected = 0
                                     self.apply_setting()
                                     
                                     with open('json_files/settings.json', "w") as f:
                                         json.dump(self.settings, f)
+                                case _: print("?")
 
             self.screen.fill(self.colors[0])
             self.render()

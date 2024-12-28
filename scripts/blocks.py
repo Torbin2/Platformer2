@@ -29,15 +29,15 @@ class Tilemap:
     
 # ======================================================================================================================
 
-    def render(self, camera, scale, images:dict):
+    def render(self, camera, scale, images:dict, use_textures:bool):
 
         onscreen_blocks = [key for key in self.blocks if -1 < key[0] - (camera[0] / 10) < 64 and -1 < key[1] - (camera[1] / 10) < 36]
         for block in onscreen_blocks:
-            self.blocks[block].render(self.screen, camera, scale, images[Type.BLOCK])
+            self.blocks[block].render(self.screen, camera, scale, images[Type.BLOCK], use_textures)
 
         onscreen_tiles = [key for key in self.tiles if -1 < key[0] - (camera[0] / 10) < 64 and -1 < key[1] - (camera[1] / 10) < 36]
         for tile in onscreen_tiles:
-            self.tiles[tile].render(self.screen, camera, scale, images)
+            self.tiles[tile].render(self.screen, camera, scale, images, use_textures)
 
     def reload_level(self):
         with open("json_files/levels.json" , "r") as f:
@@ -79,24 +79,27 @@ class Spike:
                 if sqrt((self.circ[0] - player_rect.centerx) ** 2 + (self.circ[1] - player_rect.centery)**2) <= self.circ[2]: 
                     return "death" #only hits if playercenter is in range of circle
         
-    def render(self, screen, camera, scale, images):
-        image = images[self.type]
+    def render(self, screen, camera, scale, images, use_texture):
+        if use_texture:
+            image = images[self.type]
         
         if self.shape == "square":
             draw_rect = pygame.Rect((self.rect.left - camera[0]) * scale, (self.rect.top - camera[1])* scale, self.rect.width* scale, self.rect.height* scale)
-            screen.blit(pygame.transform.scale(image, (draw_rect.width, draw_rect.height )), draw_rect.topleft)
+            
+            if use_texture: screen.blit(pygame.transform.scale(image, (draw_rect.width, draw_rect.height )), draw_rect.topleft)
+            else: pygame.draw.rect(screen, ("orange"), draw_rect)
         
         elif self.shape == "circle":
             pygame.draw.circle(screen, self.color, ((self.circ[0]- camera[0]) * scale, (self.circ[1]- camera[1]) * scale), self.circ[2] * scale)
 
 class Block:
-    def __init__(self, x, y, image_num:str):
+    def __init__(self, x, y, image_num:str, ):
         self.image_num = int(image_num) #0-9
         self.rect = pygame.Rect(x * 10 , y * 10 , 10, 10)
 
-    def render(self, screen, camera, scale, images):
+    def render(self, screen, camera, scale, images, use_texture):
         draw_rect = pygame.Rect((self.rect.left - camera[0]) * scale, (self.rect.top - camera[1])* scale, self.rect.width* scale, self.rect.height* scale)
         
-        screen.blit(pygame.transform.scale(images[self.image_num - 1], (draw_rect.width, draw_rect.height )), draw_rect.topleft) #-1,because 0-index
-
+        if use_texture: screen.blit(pygame.transform.scale(images[self.image_num - 1], (draw_rect.width, draw_rect.height )), draw_rect.topleft) #-1,because 0-index
+        else: pygame.draw.rect(screen, ("blue"), draw_rect)
         
