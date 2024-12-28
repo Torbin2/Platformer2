@@ -10,14 +10,15 @@ MORE_OFFSETS= [(-2, -2),(-2, -1),(-2, 0),(-2, 1),(-2, 2),
                (1, -2),(1, -1),(1, 0),(1, 1),(1, 2),
                (2, -2),(2, -1),(2, 0),(2, 1),(2, 2)]
 
-PYSICS_MOD = 0.75
+PYSICS_MOD = 1
+SPEED_MOD = 1
 
 
 class Player:
 
     def __init__(self, screen):
         
-        self.rect = pygame.Rect(231, 109, 9, 16)
+        self.rect = pygame.Rect(231, 109, 9, 19)
         self.speed = [0,0]
         self.screen = screen
 
@@ -37,10 +38,10 @@ class Player:
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:
-            self.speed[0] -= 0.4 * PYSICS_MOD
+            self.speed[0] -= 0.4 * PYSICS_MOD * SPEED_MOD
             self.keys_pressed["a/d"] = True
         elif keys[pygame.K_d]:
-            self.speed[0] += 0.4 * PYSICS_MOD
+            self.speed[0] += 0.4 * PYSICS_MOD * SPEED_MOD
             self.keys_pressed["a/d"] = True
         else:
             self.keys_pressed["a/d"] = False
@@ -79,7 +80,7 @@ class Player:
         else: self.keys_pressed["r"] = False
 
     def apply_mov(self, blocks): #and collison with blocks
-        # left & right
+        # left & right (back and forth)
 
         repeats = ceil(abs(self.speed[0]) / 10) + 1
         stepx = self.speed[0] / repeats
@@ -115,7 +116,6 @@ class Player:
                 continue
             break
 
-
         # gravity,
         if self.speed[1] * self.gravity < 10: #grav is 1/-1
             self.speed[1] += 0.7 * self.gravity * PYSICS_MOD
@@ -141,11 +141,10 @@ class Player:
                 if tile in blocks:
                     blocks_around.append(tile)
 
-            self.test_rect = ground_check_rect
-
             for i in blocks_around:
                 if ground_check_rect.colliderect(blocks[i].rect):
-                    ground_touch = True
+                    if (self.speed[1] > 0 and self.gravity == 1) or (self.speed[1] < 0 and self.gravity == -1):
+                        ground_touch = True
 
                 if self.rect.colliderect(blocks[i].rect):
                     if self.speed[1] > 0:
@@ -169,18 +168,18 @@ class Player:
     def friction(self):
         #higher if not pressing a/d, (could remove)
         if self.keys_pressed["a/d"] == True:
-            mult = 0.2 * PYSICS_MOD
-        else: mult = 1.6 * PYSICS_MOD
+            mult = 1
+        else: mult = 10
 
         #higher if grounded
-        if self.state == PlayerState.GROUNDED: num = max(abs(self.speed[0]) / 10, 0.7) * mult
-        else: num = max(abs(self.speed[0]) / 15, 0.4) * mult 
+        if self.state == PlayerState.GROUNDED: num = abs(self.speed[0]) /  20 * mult #makes friction 1/50 * mul from speed
+        else: num = abs(self.speed[0]) / 25 * mult 
 
         #check if speed is positive
         try:polarity = (self.speed[0] / abs(self.speed[0]))
         except ZeroDivisionError: polarity = False
 
-        #apply speed based on all the above
+        #apply speed based on all of the above
         if abs(self.speed[0]) - num < 0: self.speed[0] = 0
         else: self.speed[0] -= num * polarity
 
@@ -216,15 +215,12 @@ class Player:
 
     def draw(self, camera, scale):
         drawn_rect = pygame.Rect((self.rect.left - camera[0]) * scale, (self.rect.top - camera[1])* scale, self.rect.width* scale, self.rect.height* scale)
-        color = "white"
-        if self.state == PlayerState.AIR:
-            color = "blue"
-        pygame.draw.rect(self.screen, color, drawn_rect)
+        
+        colors = ["red","orange","white"]
+        # if self.state == PlayerState.AIR:
+        #     color = "blue"
+        pygame.draw.rect(self.screen, colors[self.jumps], drawn_rect)
 
-        #test
-        drawn_rect = pygame.Rect((self.test_rect.left - camera[0]) * scale, (self.test_rect.top - camera[1])* scale, self.test_rect.width* scale, self.test_rect.height* scale)
-        color = "red"
-        pygame.draw.rect(self.screen, color, drawn_rect)
 
     def update(self, tiles, blocks):
         self.input()

@@ -1,5 +1,6 @@
 import pygame
 import json
+
 from scripts.load_images import load_images, load_image
 from scripts.enums import Type, BlockVariants
 
@@ -15,18 +16,16 @@ class LevelEditor:
                          3 : Type.SPIKE_SNAKE}
         self.bar = 0
         self.key_press = 1
+        self.cursor_size = 1
+        self.block_size = 10
 
 
         with open("json_files/levels.json" , "r") as f:
             self.tilemap : dict = json.load(f)
 
         if self.tilemap != {}:
-            self.tilenumber = max(tuple(map(int, [i for i in self.tilemap]))) + 1
             for i in self.tilemap:
                 self.tilemap[i]["type"] = eval(self.tilemap[i]["type"])
-        else: self.tilenumber = 0
-
-        print(self.tilenumber)
 
         self.images = {
             Type.SPIKE_CUBE : load_image("spike_cube.png"),
@@ -48,15 +47,17 @@ class LevelEditor:
 
         #self.scale_to_grid = lambda x: [x[0] // (10 * scale), x[1] // (10 * scale)]
     
-    def render(self, tile):
-        if tile["type"] == Type.BLOCK:
-            draw_rect = pygame.Rect((tile["pos"][0] * 10 - self.camera[0]) * self.scale, (tile["pos"][1] * 10 - self.camera[1])* self.scale, 10* self.scale, 10* self.scale)
-            self.screen.blit(pygame.transform.scale(self.images[tile["type"]][int(tile["variant"])], (draw_rect.width, draw_rect.height )), draw_rect.topleft)
-        
-        elif tile["type"] in Type.SPIKES:
-            draw_rect = pygame.Rect((tile["pos"][0] * 10- self.camera[0]) * self.scale, (tile["pos"][1] * 10- self.camera[1])* self.scale,
-                                     10* self.scale, 10* self.scale)
-            self.screen.blit(pygame.transform.scale(self.images[tile["type"]], (draw_rect.width, draw_rect.height )), draw_rect.topleft)
+    def render(self, tile, pos):
+    
+        if 0 < pos[0] *self.block_size - self.camera[0] < 640 * self.scale and 0 < pos[1] *self.block_size - self.camera[1] < 360 * self.scale:
+            if tile["type"] == Type.BLOCK:
+                draw_rect = pygame.Rect((tile["pos"][0] * self.block_size - self.camera[0]) * self.scale, (tile["pos"][1] * self.block_size - self.camera[1])* self.scale, self.block_size* self.scale, self.block_size* self.scale)
+                self.screen.blit(pygame.transform.scale(self.images[tile["type"]][int(tile["variant"])], (draw_rect.width, draw_rect.height )), draw_rect.topleft)
+            
+            elif tile["type"] in Type.SPIKES:
+                draw_rect = pygame.Rect((tile["pos"][0] * self.block_size- self.camera[0]) * self.scale, (tile["pos"][1] * self.block_size- self.camera[1])* self.scale,
+                                        self.block_size* self.scale, self.block_size* self.scale)
+                self.screen.blit(pygame.transform.scale(self.images[tile["type"]], (draw_rect.width, draw_rect.height )), draw_rect.topleft)
 
     def quit(self):
         for i in self.tilemap:
@@ -68,32 +69,45 @@ class LevelEditor:
 
         self.tilemap = {}
 
-    def create_tile(self, _pos: list[int, int], type: Type, remove: bool):
-        pos = [(_pos[0] + self.camera[0] * self.scale) // (10 * self.scale), (_pos[1] + self.camera[1]* self.scale) // (10 * self.scale)]
-        
-        tiles_on_pos = [x for x in self.tilemap if self.tilemap[x]["pos"] == pos]
+    def create_tiles(self, mouse_pos, remove:bool):
+        offset_len = range(int(-0.5 * self.cursor_size), int(0.5 * self.cursor_size + 1))
+        block_pos = ((mouse_pos[0] + self.camera[0] * self.scale) // (self.block_size * self.scale), 
+                    (mouse_pos[1] + self.camera[1]* self.scale) // (self.block_size * self.scale))
+
+        for x_offset in offset_len: 
+            for y_offset in offset_len:
+
+                new_block_pos = (block_pos[0] + x_offset, block_pos[1] + y_offset)
+                t = self.selected[self.key_press] if self.key_press in self.selected else Type.BLOCK
+                
+                self.create_tile(new_block_pos, t, remove)
+
+    def create_tile(self, pos: tuple[int, int], type: Type, remove: bool):
+        tile_str:str = str(int(pos[0])) + ";" + str(int(pos[1]))
+
         if remove: 
-            for i in tiles_on_pos:
-                if self.tilemap[i]["type"] == Type.BLOCK:
-                    self.update_variants(self.tilemap[i]["pos"], add = False)
-                self.tilemap.pop(i)
+            if tile_str in self.tilemap:
+                if self.tilemap[tile_str]["type"] == Type.BLOCK:
+                    self.update_variants(pos, add = False)
+                self.tilemap.pop(tile_str)
             return
-        elif tiles_on_pos:#tile exists already
-            for i in tiles_on_pos:
-                if self.tilemap[i]["type"] == Type.BLOCK:
-                    self.update_variants(self.tilemap[i]["pos"], add = False)
-                self.tilemap.pop(i)
         
         if type == Type.BLOCK: 
-            self.tilemap[self.tilenumber] = {"pos": pos, "type": type, "variant": 1}
+            self.tilemap[tile_str] = {"pos": pos, "type": type, "variant": 1}
             self.update_variants(pos, add = True)
         if type in Type.SPIKES:
-            self.tilemap[self.tilenumber] = {"pos": pos, "type": type}
-        self.tilenumber += 1
+            self.tilemap[tile_str] = {"pos": pos, "type": type}
 
     def update_variants(self, new_block_pos, add: bool = True): #TODO
         pass
     
+    def highlight_cursor(self, mouse_pos) -> None:
+        cube_size = self.block_size * self.scale * self.cursor_size
+
+        s = pygame.Surface((cube_size, cube_size), pygame.SRCALPHA)   
+        s.fill((255,255,255,128))                         
+        self.screen.blit(s, (mouse_pos[0] - 0.5 * cube_size, mouse_pos[1] - 0.5 * cube_size))
+
     def main(self):
         self.run = True
         while self.run:
@@ -101,9 +115,13 @@ class LevelEditor:
                 if event.type == pygame.QUIT:
                     self.quit()
 
-                
+                if event.type == pygame.MOUSEWHEEL:
+                    self.cursor_size = max(1, self.cursor_size + 2 * event.y) #1 or -1
+                    self.block_size = round(max(1, self.block_size + 0.2 * event.x), 2)
+                    
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE: self.quit()
+                    if event.key == pygame.K_SPACE: self.camera = [0, 0]
                     
                     #movement
                     if event.key in (pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d,):
@@ -130,12 +148,15 @@ class LevelEditor:
             self.screen.fill("black")
 
             for i in self.tilemap:
-                self.render(self.tilemap[i])
+                self.render(self.tilemap[i], tuple(map(int, i.split(";"))))
 
+            mouse_pos = pygame.mouse.get_pos() 
             mouse_press = pygame.mouse.get_pressed()
+            
+            self.highlight_cursor(mouse_pos)
+
             if mouse_press[0] or mouse_press[2]:
-                x = self.selected[self.key_press] if self.key_press in self.selected else Type.BLOCK
-                self.create_tile(pygame.mouse.get_pos(), x, mouse_press[2])
+                self.create_tiles(mouse_pos, mouse_press[2])
 
             self.clock.tick(60)
             pygame.display.update()
