@@ -1,12 +1,12 @@
 import pygame
-from scripts.enums import Type, PlayerState
+from scripts.enums import Type, PlayerState, Events
 from math import ceil
 
 OFFSETS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0),(1, 1),
            (0, 2), (0,-2)]
 
 
-PYSICS_MOD = 1
+PhYSICS_MOD = 1
 SPEED_MOD = 1
 
 
@@ -34,10 +34,10 @@ class Player:
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:
-            self.speed[0] -= 0.4 * PYSICS_MOD * SPEED_MOD
+            self.speed[0] -= 0.4 * PhYSICS_MOD * SPEED_MOD
             self.keys_pressed["a/d"] = True
         elif keys[pygame.K_d]:
-            self.speed[0] += 0.4 * PYSICS_MOD * SPEED_MOD
+            self.speed[0] += 0.4 * PhYSICS_MOD * SPEED_MOD
             self.keys_pressed["a/d"] = True
         else:
             self.keys_pressed["a/d"] = False
@@ -48,8 +48,8 @@ class Player:
                     self.jumps -= 1
 
                     if self.gravity == 1:
-                        self.speed[1] = -12 * PYSICS_MOD
-                    else: self.speed[1] = +12 * PYSICS_MOD
+                        self.speed[1] = -12 * PhYSICS_MOD
+                    else: self.speed[1] = +12 * PhYSICS_MOD
                 
                 self.keys_pressed["space"] = True 
         else: self.keys_pressed["space"] = False
@@ -99,13 +99,13 @@ class Player:
                 if self.rect.colliderect(blocks[i].rect):
                     if self.speed[0] > 0: 
                         self.rect.right = blocks[i].rect.left
-                        self.speed[0] -= 4 * PYSICS_MOD
+                        self.speed[0] -= 4 * PhYSICS_MOD
                         if self.speed[0] < 0: self.speed[0] = 0 #in case of direction shift by collision
                         break
 
                     elif self.speed[0] < 0:
                         self.rect.left = blocks[i].rect.right
-                        self.speed[0] += 4 * PYSICS_MOD
+                        self.speed[0] += 4 * PhYSICS_MOD
                         if self.speed[0] > 0: self.speed[0] = 0#in case of direction shift by collision
                         break
             else:
@@ -114,7 +114,7 @@ class Player:
 
         # gravity,
         if self.speed[1] * self.gravity < 10: #grav is 1/-1
-            self.speed[1] += 0.7 * self.gravity * PYSICS_MOD
+            self.speed[1] += 0.7 * self.gravity * PhYSICS_MOD
               
         repeats = ceil(abs(self.speed[1]) / 10) + 1
         stepy = self.speed[1]/ repeats
@@ -169,7 +169,7 @@ class Player:
 
         #higher if grounded
         if self.state == PlayerState.GROUNDED: num = abs(self.speed[0]) /  20 * mult #makes friction 1/50 * mul from speed
-        else: num = abs(self.speed[0]) / 25 * mult 
+        else: num = abs(self.speed[0]) / 25 * mult
 
         #check if speed is positive
         try:polarity = (self.speed[0] / abs(self.speed[0]))
@@ -178,9 +178,6 @@ class Player:
         #apply speed based on all of the above
         if abs(self.speed[0]) - num < 0: self.speed[0] = 0
         else: self.speed[0] -= num * polarity
-
-
-
 
 
     def update_camera(self, camera):
@@ -205,7 +202,7 @@ class Player:
         for tile in tiles_around:
             event = tiles[tile].collision_logic(self.rect)
             match event:
-                case "death":
+                case Events.DEATH:
                     print(f"hit by {tile}")
                     self.rect.center = (20, 20)
 

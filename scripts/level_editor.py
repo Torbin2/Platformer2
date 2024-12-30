@@ -4,6 +4,29 @@ import json
 from scripts.load_images import load_images, load_image
 from scripts.enums import Type, BlockVariants
 
+"""
+
+Hoe gaan we dit doen
+"name" : {pos, } 
+
+DUS
+
+pos: {"pos": pos:tuple[int, int], "type": type, "variant": 1} of
+pos: {"pos": pos, "type": type}
+
+x;y;type;...
+3
+1234;456;1;1 -> cube
+
+(bin) 00 ~ FF -> 0 - 127
+
+; = 0xFF
+0 - 126 (😭)
+
+
+
+"""
+
 class LevelEditor:
     def __init__(self, scale):
         self.scale = scale
@@ -124,7 +147,7 @@ class LevelEditor:
                     if event.key == pygame.K_SPACE: self.camera = [0, 0]
                     
                     #movement
-                    if event.key in (pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d,):
+                    if event.key in (pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d):
                         self.movement = (int(self.directions[event.key][0]) * 20, int(self.directions[event.key][1] * 20))
                         self.directions[event.key][2] = True
                     
