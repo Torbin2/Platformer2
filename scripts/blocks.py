@@ -77,7 +77,7 @@ class Spike:
                     return "death"
             case "circle":
                 if sqrt((self.circ[0] - player_rect.centerx) ** 2 + (self.circ[1] - player_rect.centery)**2) <= self.circ[2]: 
-                    return "death" #only hits if playercenter is in range of circle
+                    return "death" #only hits if player center is in range of circle
         
     def render(self, screen, camera, scale, images, use_texture):
         if use_texture:
