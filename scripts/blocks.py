@@ -1,11 +1,8 @@
-import abc
+import abc # 💀
 
 import pygame
 from math import sqrt
 import json
-
-from pygame.examples.cursors import image
-from pygame.transform import scale
 
 from scripts.enums import Type, TileShapes, Events
 
@@ -114,10 +111,29 @@ class Block:
         if use_texture: screen.blit(self.image, draw_rect.topleft) #-1,because 0-index
         else: pygame.draw.rect(screen, "blue", draw_rect)
 
-class Tile(abc.ABC):
+"""
+
+Tile
+
+    Type
+        Solid
+        Spike
+        ...
+        
+    Collision shape
+        Circle
+        Rect
     
+    Collision: __init__(on_collision: typing.Callable)
+        
+    Rendering -> 
+
+"""
+
+class TileType(abc.ABC): # 💀
+
     @abc.abstractmethod
-    def __init__(self, x, y):
+    def __init__(self):
         pass
 
     @abc.abstractmethod
@@ -127,3 +143,21 @@ class Tile(abc.ABC):
     @abc.abstractmethod
     def render(self):
         pass
+
+
+class SolidBlock(TileType):
+
+    def __init__(self, x, y, shape):
+        self.x = x
+        self.y = y
+        self.shape = shape
+
+    def collision(self):
+        pass
+
+    def render(self):
+        match (self.shape): # nu, Tschuss :tm:tm:t:tm dag ad
+            case _:
+                pass
+
+# waar ben je
