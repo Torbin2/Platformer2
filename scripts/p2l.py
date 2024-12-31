@@ -19,6 +19,10 @@ The mew one v1.0
         1 (SPIKE) = None
         2 (...)
 
+    "102;26": {"pos": [102, 26], "type": "Type.BLOCK", "variant": 1} = 64 characters ->
+
+    66 1A 00 01 (in hex) = 4 characters (16x compression)
+
 
 The new one v1.1️±±±
     # index: type(properties)
