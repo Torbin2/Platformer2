@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 import abc # 💀
+import typing
 
 import pygame
 from math import sqrt
 import json
+import collections
+import enum
 
 from scripts.enums import Type, TileShapes, Events
 
@@ -30,7 +35,7 @@ class Tilemap:
             self.blocks[(tile["pos"][0], tile["pos"][1])] = Block(tile["pos"][0], tile["pos"][1], self.images[Type.BLOCK][tile["variant"]], self.scale )
     
         elif tile["type"] in Type.SPIKES:
-            self.tiles[(tile["pos"][0], tile["pos"][1])] = Spike(tile["pos"][0], tile["pos"][1], tile["type"], self.images[int(tile["type"])], self.scale)
+            self.tiles[(tile["pos"][0], tile["pos"][1])] = Spike(tile["pos"][0], tile["pos"][1], tile["type"], self.images[tile["type"]], self.scale)
 # ======================================================================================================================
 
     def render_tiles(self, camera, use_textures:bool):
@@ -119,45 +124,68 @@ Tile
         Solid
         Spike
         ...
-        
-    Collision shape
-        Circle
-        Rect
     
     Collision: __init__(on_collision: typing.Callable)
+        Collision shape
+            Circle
+            Rect
         
     Rendering -> 
 
 """
 
-class TileType(abc.ABC): # 💀
+
+class Collider(abc.ABC):
+    @abc.abstractmethod
+    def __init__(self, on_collision: collections.abc.Callable[[], None], *args, **kwargs):
+        pass
 
     @abc.abstractmethod
+    def check_collision(self, other: Collider) -> Events | None:
+        pass
+
+
+class Renderer(abc.ABC):
+    @abc.abstractmethod
+    def __init__(self, collider: Collider, *args, **kwargs):
+        pass
+
+    @abc.abstractmethod
+    def render(self, screen: pygame.Surface, camera: list[int], use_texture: bool) -> None:  # TODO: It would be better if the texture renderer was another class
+        pass
+
+
+# TODO: TileFactory
+
+
+class TileFactory:
     def __init__(self):
         pass
 
-    @abc.abstractmethod
-    def collision(self):
-        pass
-
-    @abc.abstractmethod
-    def render(self):
-        pass
+    def add_renderer(self, renderer_type: typing.Type):
+        raise NotImplementedError()  # TODO
 
 
-class SolidBlock(TileType):
+class Tile:
+    collider: Collider
+    renderer: Renderer
 
-    def __init__(self, x, y, shape):
-        self.x = x
-        self.y = y
-        self.shape = shape
+    def __init__(self, collider, renderer, *args, **kwargs):
+        self.collider = collider
+        self.renderer = renderer
 
-    def collision(self):
-        pass
+    def collision(self, other: Collider) -> Events | None:
+        return self.collider.check_collision(other)
 
-    def render(self):
-        match (self.shape): # nu, Tschuss :tm:tm:t:tm dag ad
-            case _:
-                pass
+    def render(self, screen: pygame.Surface, camera: list[int], use_texture: bool) -> None:
+        self.renderer.render(screen, camera, use_texture)
 
-# waar ben je
+
+class SolidBlock(Tile):
+    def __init__(self, collider: Collider):
+        renderer = Renderer(collider)
+        super().__init__(collider, renderer)
+
+
+class TileTypes(enum.Enum):
+    BLOCK: collections.abc.Callable[[int, int], Tile] = lambda x, y: SolidBlock
