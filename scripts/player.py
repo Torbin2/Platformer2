@@ -76,7 +76,7 @@ class Player:
         else: self.keys_pressed["r"] = False
 
     def apply_mov(self, blocks): #and collison with blocks
-        # left & right (back and forth)
+        # left & right (back and forth (Sisphus reference>!!!!!!???))
 
         repeats = ceil(abs(self.speed[0]) / 10) + 1
         stepx = self.speed[0] / repeats
@@ -209,10 +209,14 @@ class Player:
     def draw(self, camera, scale):
         drawn_rect = pygame.Rect((self.rect.left - camera[0]) * scale, (self.rect.top - camera[1])* scale, self.rect.width* scale, self.rect.height* scale)
         
-        colors = ["red","orange","white"]
-        # if self.state == PlayerState.AIR:
+        colors = [(255, 0), (255, 128), (255, 255)]
+        # FF8000 128
+
+        color = colors[self.jumps]
+        # if self.jumps < 2
         #     color = "blue"
-        pygame.draw.rect(self.screen, colors[self.jumps], drawn_rect)
+        color += ((0, 255)[self.flips],)
+        pygame.draw.rect(self.screen, color, drawn_rect)
 
 
     def update(self, tiles, blocks):

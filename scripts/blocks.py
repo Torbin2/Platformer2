@@ -7,9 +7,9 @@ import pygame
 from math import sqrt
 import json
 import collections
-import enum
 
 from scripts.enums import Type, TileShapes, Events
+from scripts import load_images
 
 
 class Tilemap:
@@ -141,7 +141,7 @@ class Collider(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def check_collision(self, other: Collider) -> Events | None:
+    def check_collision(self, other: Collider) -> tuple[bool, Events | None]:
         pass
 
 
@@ -151,22 +151,51 @@ class Renderer(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def render(self, screen: pygame.Surface, camera: list[int], use_texture: bool) -> None:  # TODO: It would be better if the texture renderer was another class
+    def render(self, screen: pygame.Surface, camera: list[int], tilemap: TileMap2) -> None:  # TODO: It would be better if the texture renderer was another class
         pass
-
-
-# TODO: TileFactory
 
 
 class TileFactory:
-    def __init__(self):
-        pass
 
-    def add_renderer(self, renderer_type: typing.Type):
-        raise NotImplementedError()  # TODO
+    def __init__(self, **kwargs):
+        # TODO: Deduplicate this code
+        self._collider_type: typing.Type | None = kwargs.get('collider_type', None)
+        self._collider_args: list | None = kwargs.get('collider_args', None)
+        self._collider_kwargs: dict | None = kwargs.get('collider_kwargs', None)
+
+        self._renderer_type: typing.Type | None = kwargs.get('renderer_type', None)
+        self._renderer_args: list | None = kwargs.get('renderer_args', None)
+        self._renderer_kwargs: dict | None = kwargs.get('renderer_kwargs', None)
+
+        self._tile_type: typing.Type | None = kwargs.get('tile_type', None)
+
+    def add_type(self, collider_type: typing.Type, *args, **kwargs):
+        if not issubclass(collider_type, Collider):
+            raise TypeError()
+        self._collider_type = collider_type
+        self._collider_args = args
+        self._collider_kwargs = kwargs
+
+    def add_renderer(self, renderer_type: typing.Type, *args, **kwargs):
+        if not issubclass(renderer_type, Renderer):
+            raise TypeError()
+        self._renderer_type = renderer_type
+        self._renderer_args = args
+        self._renderer_kwargs = kwargs
+
+    def add_tile(self, tile_type: typing.Type):
+        if not issubclass(tile_type, Tile):
+            raise TypeError()
+        self._tile_type = tile_type
+
+    def create(self, *args, **kwargs):
+        collider = self._collider_type(self._tile_type.on_collision, *self._collider_args or [], *args, **self._collider_kwargs or {}, **kwargs)
+        renderer = self._renderer_type(collider, *self._renderer_args or [], **self._renderer_kwargs or {})
+        return self._tile_type(collider, renderer)
 
 
-class Tile:
+class Tile(abc.ABC):
+
     collider: Collider
     renderer: Renderer
 
@@ -174,18 +203,95 @@ class Tile:
         self.collider = collider
         self.renderer = renderer
 
-    def collision(self, other: Collider) -> Events | None:
+    def collision(self, other: Collider) -> tuple[bool, Events | None]:
         return self.collider.check_collision(other)
 
-    def render(self, screen: pygame.Surface, camera: list[int], use_texture: bool) -> None:
-        self.renderer.render(screen, camera, use_texture)
+    @abc.abstractmethod
+    def on_collision(self, other: Tile) -> tuple[bool, Events | None]:
+        """:return If player should collide"""
+        pass
+
+    def render(self, screen: pygame.Surface, camera: list[int], tilemap: TileMap2) -> None:
+        self.renderer.render(screen, camera, tilemap)
 
 
 class SolidBlock(Tile):
-    def __init__(self, collider: Collider):
-        renderer = Renderer(collider)
+
+    def __init__(self, collider: Collider, renderer: Renderer):
         super().__init__(collider, renderer)
 
+    def on_collision(self, other: Tile):
+        return True, None
 
-class TileTypes(enum.Enum):
-    BLOCK: collections.abc.Callable[[int, int], Tile] = lambda x, y: SolidBlock
+
+class BlockCollider(Collider):
+
+    def __init__(self, on_collision: collections.abc.Callable[[Collider], tuple[bool, Events | None]], x: int, y: int):
+        self._on_collision = on_collision
+        self._rect = pygame.Rect(x * 10, y * 10, 10, 10)
+
+    def check_collision(self, other: Collider) -> tuple[bool, Events | None]:
+        if not isinstance(other, self.__class__):
+            raise NotImplemented
+        if self._rect.colliderect(other._rect):
+            return self._on_collision(other)
+
+
+class SolidBlockRenderer(Renderer):
+
+    def __init__(self, collider = BlockCollider):
+        self.collider = collider
+
+    def render(self, screen: pygame.Surface, camera: list[int], tilemap: TileMap2) -> None:
+        if not isinstance(self.collider, BlockCollider):
+            raise NotImplementedError()
+
+        rect = self.collider._rect
+
+        draw_rect = pygame.Rect((rect.left - camera[0]) * tilemap.scale, (rect.top - camera[1]) * tilemap.scale,
+                                rect.width * tilemap.scale, rect.height * tilemap.scale)
+
+        if tilemap.use_textures:
+            screen.blit(tilemap.images[Type.BLOCK], draw_rect.topleft)
+        else:
+            pygame.draw.rect(screen, "orange", draw_rect)
+
+
+class TileMap2:
+    def __init__(self, screen_, scale_: int, use_textures: bool):
+
+        self.screen = screen_
+        self.scale = scale_
+        self.use_textures = use_textures
+        self.images = []
+
+        class TileTypes:
+            BLOCK = TileFactory(renderer_type=SolidBlockRenderer, collider_type=BlockCollider, tile_type=SolidBlock)
+
+        self.TileTypes = TileTypes
+
+        self.tiles: list[Tile] = [] # TODO
+
+        for rx in range(10):
+            self.tiles.append(self.TileTypes.BLOCK.create(rx, 0))
+
+        self._images = {
+            Type.SPIKE_SNAKE: load_images.load_image("snake.png"),
+            Type.BLOCK: load_images.load_images("tiles/")[1],
+            Type.SPIKE_CUBE: load_images.load_image("spike_cube.png")
+        }
+        self.images: dict
+        self.scale_images()
+
+
+    def render(self, camera_: list[int]):
+        for tile in self.tiles:
+            tile.render(self.screen, camera_, self)
+
+    def scale_images(self) -> None:
+        size = round(self.scale * 10)
+        self.images = {
+            key: pygame.transform.scale(
+                self._images[key], (size, size)
+            ) for key in self._images
+        }

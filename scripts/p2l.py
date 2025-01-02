@@ -9,8 +9,9 @@ The old one ™™ (with arbitery code execution 🤯💀):
 
 The mew one v1.0
 
-    x, y, type, properties
+    len, x, y, type, properties
 
+    len = 0x00 ~ 0xFF (0 ~ 127)
     x = 0x0000 ~ 0xFFFF (with negatives, -32767 ~ 32767)
     y = 0x0000 ~ 0xFFFF (with negatives, -32767 ~ 32767)
     type = 0x00 ~ 0xFF (0 ~ 127)
@@ -21,7 +22,7 @@ The mew one v1.0
 
     "102;26": {"pos": [102, 26], "type": "Type.BLOCK", "variant": 1} = 64 characters ->
 
-    66 1A 00 01 (in hex) = 4 characters (16x compression)
+    06 00 66 00 1A 00 01 (in hex) = 7 characters (10.6x compression)
 
 
 The new one v1.1️±±±
@@ -41,3 +42,13 @@ The new one v1.1️±±±
 # https://en.wikipedia.org/wiki/Run-length_encoding
 
 """
+
+import blocks
+
+class LevelWriter:
+
+    def __init__(self):
+        pass
+
+    def write_tile(self, tile: blocks.Tile):
+        pass
