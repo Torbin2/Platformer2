@@ -1,5 +1,5 @@
 import pygame
-from scripts.enums import Type, PlayerState, Events
+from enums import Type, PlayerState, Events
 from math import ceil
 
 OFFSETS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0),(1, 1),

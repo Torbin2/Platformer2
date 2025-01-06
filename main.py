@@ -1,9 +1,9 @@
 import pygame
-from scripts.player import Player
-from scripts.blocks import TileMap2 as Tilemap
-from scripts.menu import Menu
-from scripts.load_images import load_image, load_images
-from scripts.enums import Type
+from player import Player
+from blocks import TileMap2 as Tilemap
+from menu import Menu
+from load_images import load_image, load_images
+from enums import Type
 
 pygame.init()
 pygame.display.set_caption('platformer2')

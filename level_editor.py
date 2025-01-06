@@ -1,8 +1,8 @@
 import pygame
 import json
 
-from scripts.load_images import load_images, load_image
-from scripts.enums import Type, BlockVariants
+from load_images import load_images, load_image
+from enums import Type, BlockVariants
 
 """
 
@@ -39,7 +39,7 @@ class LevelEditor:
         self.block_size = 10
 
 
-        with open("json_files/levels.json" , "r") as f:
+        with open("levels.json" , "r") as f:
             self.tilemap : dict = json.load(f)
 
         if self.tilemap != {}:
@@ -82,7 +82,7 @@ class LevelEditor:
         for i in self.tilemap:
             self.tilemap[i]["type"] = str(self.tilemap[i]["type"])
 
-        with open("json_files/levels.json" , "w") as f:
+        with open("levels.json" , "w") as f:
             json.dump(self.tilemap, f)
         self.run = False
 
@@ -194,5 +194,5 @@ class LevelEditor:
             self.tiles[str(i+400)] = {"pos": [12, i + 5], "type" : "spike", "variant" : "snake"}
 
 
-        with open("json_files/levels.json" , "w") as f:
+        with open("levels.json" , "w") as f:
             json.dump(self.tiles, f)

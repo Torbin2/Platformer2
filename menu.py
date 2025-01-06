@@ -1,13 +1,13 @@
 import pygame
 import json
-from scripts.level_editor import LevelEditor
+from level_editor import LevelEditor
 
 FONT_SIZE = 35
 class Menu:
     def __init__(self):
 
         try:
-            with open("json_files/settings.json", "r") as f:
+            with open("settings.json", "r") as f:
                 self.settings = json.load(f)
         except FileNotFoundError:
             self.settings = {
@@ -17,7 +17,7 @@ class Menu:
                 "sound": False,
                 "back": ""
             }
-            with open("json_files/settings.json", "w") as f:
+            with open("settings.json", "w") as f:
                 json.dump(self.settings, f)
         
         self.scale = self.settings["window_size"]
@@ -116,7 +116,7 @@ class Menu:
                                     self.selected = 0
                                     self.apply_setting()
                                     
-                                    with open('json_files/settings.json', "w") as f:
+                                    with open('settings.json', "w") as f:
                                         json.dump(self.settings, f)
                                 case _: print("?")
 

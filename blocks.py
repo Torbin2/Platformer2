@@ -8,8 +8,8 @@ from math import sqrt
 import json
 import collections
 
-from scripts.enums import Type, TileShapes, Events
-from scripts import load_images
+from enums import Type, TileShapes, Events
+from load_images import load_image, load_images
 
 
 class Tilemap:
