@@ -1,6 +1,10 @@
 import pygame
 import json
+
+from os import listdir
+
 from level_editor import LevelEditor
+
 
 FONT_SIZE = 35
 class Menu:
@@ -22,23 +26,24 @@ class Menu:
         
         self.scale = self.settings["window_size"]
 
-        self.screen = pygame.display.set_mode((640 * self.scale, 360* self.scale))#16 *4: 9 * 4
-        
+        self.screen = pygame.display.set_mode((640 * self.scale, 360* self.scale))#16 *4: 9 * 4  
         self.clock = pygame.time.Clock()
         
         self.font = pygame.font.Font(pygame.font.get_default_font(), FONT_SIZE* self.scale)
         self.smaller_font = pygame.font.Font(pygame.font.get_default_font(), int(FONT_SIZE / 1.5) * self.scale)
+        
         self.colors = ["#041413", "#25BEB3", "#146963"]
 
         self.viewing = "main"
         self.selected = 0
         
-
         self.options = {"start" : 60,
                         "level_editor" : 110,
                         "options" : 210,
                         "quit" : 260}
         
+        self.available_levels : list[str] = sorted(listdir("levels/"))
+        if self.settings["level"] not in self.available_levels: self.settings["level"] = self.available_levels[0]
 
 
     def render(self):
@@ -96,7 +101,7 @@ class Menu:
                                 case 0:
                                     self.run = False
                                 case 1:
-                                    LevelEditor(self.scale).main()
+                                    LevelEditor(self.scale, self.settings["level"]).main()
                                 case 2: self.viewing = 'settings'
                                 case 3:
                                     pygame.quit()
@@ -107,13 +112,15 @@ class Menu:
                                 case "window_size": 
                                     if self.settings["window_size"] >= 9: self.settings["window_size"] = 1 
                                     else: self.settings["window_size"] += 1
-                                case "textures": self.settings["textures"] = not self.settings["textures"]
-                                case "high_fps": 
-                                    self.settings["high_fps"] = not self.settings["high_fps"]
                                 
-                                case "sound": 
-                                    self.settings["sound"] = not self.settings["sound"]
-                        
+                                case "level": 
+                                    next_level:int = (self.available_levels.index(self.settings["level"]) + 1) % len(self.available_levels)
+                                    self.settings["level"] = self.available_levels[next_level]
+
+                                case "textures": self.settings["textures"] = not self.settings["textures"]
+                                case "high_fps": self.settings["high_fps"] = not self.settings["high_fps"]
+                                case "sound": self.settings["sound"] = not self.settings["sound"]
+
                                 case "back":
                                     self.viewing = 'main'
                                     self.selected = 0

@@ -24,7 +24,7 @@ x;y;type;...
 """
 
 class LevelEditor:
-    def __init__(self, scale):
+    def __init__(self, scale, level_name : str):
         self.scale = scale
 
         self.screen = pygame.display.set_mode((640 * self.scale, 360* self.scale))#16 *4: 9 * 4
@@ -38,8 +38,8 @@ class LevelEditor:
         self.cursor_size = 1
         self.block_size = 10
 
-
-        with open("levels.json" , "r") as f:
+        self.selected_level:str = "levels/" + level_name
+        with open(self.selected_level , "r") as f:
             self.tilemap : dict = json.load(f)
 
         if self.tilemap != {}:
@@ -82,7 +82,7 @@ class LevelEditor:
         for i in self.tilemap:
             self.tilemap[i]["type"] = str(self.tilemap[i]["type"])
 
-        with open("levels.json" , "w") as f:
+        with open(self.selected_level , "w") as f:
             json.dump(self.tilemap, f)
         self.run = False
 
@@ -185,14 +185,14 @@ class LevelEditor:
         for i in range(100):
 
         
-            self.tiles[str(i)] = {"pos": [i, 0], "type" : Type.BLOCK, "variant" : "3"}
-            self.tiles[str(i+100)] = {"pos": [i, 40], "type" : "block", "variant" : "1"}
-            self.tiles[str(i+200)] = {"pos": [0, i], "type" : "block", "variant" : "2"}
-            self.tiles[str(i+300)] = {"pos": [60, i], "type" : "block", "variant" : "4"}
+            self.tiles[str(i)] = {"pos": [i, 0], "type" : "Type.BLOCK", "variant" : "3"}
+            self.tiles[str(i+100)] = {"pos": [i, 40], "type" : "Type.BLOCK", "variant" : "1"}
+            self.tiles[str(i+200)] = {"pos": [0, i], "type" : "Type.BLOCK", "variant" : "2"}
+            self.tiles[str(i+300)] = {"pos": [60, i], "type" : "Type.BLOCK", "variant" : "4"}
 
         for i in range(10):
-            self.tiles[str(i+400)] = {"pos": [12, i + 5], "type" : "spike", "variant" : "snake"}
+            self.tiles[str(i+400)] = {"pos": [12, i + 5], "type" : "Type.SPIKE_CUBE"}
 
 
-        with open("levels.json" , "w") as f:
+        with open(self.selected_level , "w") as f:
             json.dump(self.tiles, f)
