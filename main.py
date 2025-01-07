@@ -26,7 +26,8 @@ class Game:
         self.camera = [0, 0]
 
     def apply_setting(self):
-        self.settings = menu.main()
+        menu.main(restart = True)
+        self.settings = menu.settings
 
         self.scale = self.settings["window_size"]
         self.screen = pygame.display.set_mode((640 * self.scale , 360 * self.scale)) #16:9 ratio

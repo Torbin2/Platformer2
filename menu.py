@@ -73,6 +73,7 @@ class Menu:
         self.scale = self.settings["window_size"]
         self.screen = pygame.display.set_mode((640 * self.scale, 360* self.scale))
         self.font = pygame.font.Font(pygame.font.get_default_font(), FONT_SIZE* self.scale)
+        self.smaller_font = pygame.font.Font(pygame.font.get_default_font(), int(FONT_SIZE / 1.5) * self.scale)
 
     def handle_input(self):
         for event in pygame.event.get():
@@ -93,7 +94,7 @@ class Menu:
                         if self.viewing == 'main':
                             match self.selected:
                                 case 0:
-                                    return self.settings
+                                    self.run = False
                                 case 1:
                                     LevelEditor(self.scale).main()
                                 case 2: self.viewing = 'settings'
@@ -102,28 +103,30 @@ class Menu:
                                     exit()
 
                         elif self.viewing == 'settings': 
-                            match self.selected: #TODO: check setting name, not self.selected's number
-                                case 0: 
+                            match sorted(self.settings)[self.selected] if self.selected < len(self.settings) else "back":
+                                case "window_size": 
                                     if self.settings["window_size"] >= 9: self.settings["window_size"] = 1 
                                     else: self.settings["window_size"] += 1
-                                case 1: self.settings["textures"] = not self.settings["textures"]
-                                case 2: 
+                                case "textures": self.settings["textures"] = not self.settings["textures"]
+                                case "high_fps": 
                                     self.settings["high_fps"] = not self.settings["high_fps"]
                                 
-                                case 3: 
+                                case "sound": 
                                     self.settings["sound"] = not self.settings["sound"]
-
-                                case 4: 
+                        
+                                case "back":
                                     self.viewing = 'main'
                                     self.selected = 0
                                     self.apply_setting()
                                     
                                     with open('settings.json', "w") as f:
                                         json.dump(self.settings, f)
-                                case _: print("?")
+                                case _:
+                                    print("setting's not implented")
 
-    def main(self):
-        while True:
+    def main(self, restart:bool = False):
+        if restart: self.run = True
+        while self.run:
             self.handle_input()
 
             self.screen.fill(self.colors[0])
