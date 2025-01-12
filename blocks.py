@@ -276,9 +276,9 @@ class TileMap2:
             self.tiles.append(self.TileTypes.BLOCK.create(rx, 0))
 
         self._images = {
-            Type.SPIKE_SNAKE: load_images.load_image("snake.png"),
-            Type.BLOCK: load_images.load_images("tiles/")[1],
-            Type.SPIKE_CUBE: load_images.load_image("spike_cube.png")
+            Type.SPIKE_SNAKE: load_image("snake.png"),
+            Type.BLOCK: load_images("tiles/")[1],
+            Type.SPIKE_CUBE: load_image("spike_cube.png")
         }
         self.images: dict
         self.scale_images()

@@ -4,24 +4,7 @@ import json
 from load_images import load_images, load_image
 from enums import Type, BlockVariants
 
-"""
-
-Hoe gaan we dit doen
-"name" : {pos, } 
-
-DUS
-
-pos: {"pos": pos:tuple[int, int], "type": type, "variant": 1} of
-pos: {"pos": pos, "type": type}
-
-x;y;type;...
-3
-1234;456;1;1 -> cube
-
-
-
-
-"""
+OFFSETS = [(0, -1),(0, 1),(-1, 0),(1, 0),(0,0) ]
 
 class LevelEditor:
     def __init__(self, scale, level_name : str):
@@ -42,9 +25,9 @@ class LevelEditor:
         with open(self.selected_level , "r") as f:
             self.tilemap : dict = json.load(f)
 
-        if self.tilemap != {}:
-            for i in self.tilemap:
-                self.tilemap[i]["type"] = eval(self.tilemap[i]["type"])
+            if self.tilemap != {}:
+                for i in self.tilemap:
+                    self.tilemap[i]["type"] = eval(self.tilemap[i]["type"])
 
         self.images = {
             Type.SPIKE_CUBE : load_image("spike_cube.png"),
@@ -52,7 +35,6 @@ class LevelEditor:
             Type.SPIKE_SNAKE : load_image("snake.png"),
         }
 
-        
 
         self.directions = {
             pygame.K_w : [0, -1, False],
@@ -102,23 +84,61 @@ class LevelEditor:
                 self.create_tile(new_block_pos, t, remove)
 
     def create_tile(self, pos: tuple[int, int], type: Type, remove: bool):
-        tile_str:str = str(int(pos[0])) + ";" + str(int(pos[1]))
+        tile_str:str = self.pos_to_str(pos)
 
         if remove: 
             if tile_str in self.tilemap:
                 if self.tilemap[tile_str]["type"] == Type.BLOCK:
-                    self.update_variants(pos, add = False)
+                    self.update_block_variants(pos, add = False)
                 self.tilemap.pop(tile_str)
             return
         
         if type == Type.BLOCK: 
             self.tilemap[tile_str] = {"pos": pos, "type": type, "variant": 1}
-            self.update_variants(pos, add = True)
+            self.update_block_variants(pos, add = True)
         if type in Type.SPIKES:
             self.tilemap[tile_str] = {"pos": pos, "type": type}
 
-    def update_variants(self, new_block_pos, add: bool = True): #TODO
-        pass
+    def update_block_variants(self, new_block_pos, add: bool = True) -> int:
+        surrounding_blocks = []
+        for offset in OFFSETS:
+            surrounding_block: str = self.pos_to_str(new_block_pos, offset)
+            try:
+                if self.tilemap[surrounding_block]["type"] == Type.BLOCK: 
+                    surrounding_blocks.append((new_block_pos[0] + offset[0], new_block_pos[1] + offset[1]))
+            except KeyError: pass
+
+        
+        for block in surrounding_blocks: #could save tiles)around for every tile to optimize
+            tiles_around = {(0, -1) : False, (0, 1) : False, (-1, 0) : False,(1, 0) : False,}
+            
+            #find tiles aound
+            for offset in OFFSETS:
+                if offset == (0, 0): pass
+                try:
+                    if self.tilemap[self.pos_to_str(block, offset)]["type"] == Type.BLOCK: 
+                        tiles_around[offset] = True
+                except KeyError: pass
+
+            #update variant accordingly
+            
+            if [tiles_around[x] for x in tiles_around].count(True) in (3, 4): 
+                block_str = "ALL"
+            elif [tiles_around[x] for x in tiles_around].count(True) == 0:
+                block_str = "FREE"
+            else:
+                block_str = ""
+                if tiles_around[(0, -1)]: block_str = "TOP"
+                elif tiles_around[(0, 1)]: block_str = "BOTTOM"
+
+                if tiles_around[(-1, 0)]: block_str += "LEFT"
+                elif tiles_around[(1, 0)]: block_str += "RIGHT"
+
+            self.tilemap[self.pos_to_str(block)]["variant"] = eval("BlockVariants." + block_str)
+            print(eval("BlockVariants." + block_str))
+    
+    def pos_to_str(self, pos, offset = (0, 0)) ->str:
+        return str(int(pos[0] + offset[0])) + ";" + str(int(pos[1] + offset[1]))
     
     def highlight_cursor(self, mouse_pos) -> None:
         cube_size = self.block_size * self.scale * self.cursor_size

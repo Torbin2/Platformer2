@@ -9,7 +9,8 @@ class Type(Flag):
 
     SPIKES = SPIKE_SNAKE | SPIKE_CUBE | SPIKE_CIRCLE
 
-class BlockVariants(Enum):
+class BlockVariants(): #not a enum D:
+
     TOP: int = 1
     RIGHT: int = 2
     BOTTOM: int = 3
@@ -20,6 +21,8 @@ class BlockVariants(Enum):
     BOTTOMLEFT: int = 8
     FREE: int = 9
     ALL: int = 10
+
+    
 
 class PlayerState(Enum):
     GROUNDED = auto()
