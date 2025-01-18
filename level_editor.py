@@ -35,7 +35,6 @@ class LevelEditor:
             Type.SPIKE_SNAKE : load_image("snake.png"),
         }
 
-
         self.directions = {
             pygame.K_w : [0, -1, False],
             pygame.K_a : [-1, 0, False],
@@ -53,7 +52,7 @@ class LevelEditor:
         if 0 < pos[0] *self.block_size - self.camera[0] < 640 * self.scale and 0 < pos[1] *self.block_size - self.camera[1] < 360 * self.scale:
             if tile["type"] == Type.BLOCK:
                 draw_rect = pygame.Rect((tile["pos"][0] * self.block_size - self.camera[0]) * self.scale, (tile["pos"][1] * self.block_size - self.camera[1])* self.scale, self.block_size* self.scale, self.block_size* self.scale)
-                self.screen.blit(pygame.transform.scale(self.images[tile["type"]][int(tile["variant"])], (draw_rect.width, draw_rect.height )), draw_rect.topleft)
+                self.screen.blit(pygame.transform.scale(self.images[Type.BLOCK][tile["variant"]], (draw_rect.width, draw_rect.height )), draw_rect.topleft)
             
             elif tile["type"] in Type.SPIKES:
                 draw_rect = pygame.Rect((tile["pos"][0] * self.block_size- self.camera[0]) * self.scale, (tile["pos"][1] * self.block_size- self.camera[1])* self.scale,
@@ -88,18 +87,20 @@ class LevelEditor:
 
         if remove: 
             if tile_str in self.tilemap:
-                if self.tilemap[tile_str]["type"] == Type.BLOCK:
-                    self.update_block_variants(pos, add = False)
                 self.tilemap.pop(tile_str)
+
+                if self.tilemap[tile_str]["type"] == Type.BLOCK:
+                    self.update_block_variants(pos)
+                
             return
         
         if type == Type.BLOCK: 
             self.tilemap[tile_str] = {"pos": pos, "type": type, "variant": 1}
-            self.update_block_variants(pos, add = True)
+            self.update_block_variants(pos)
         if type in Type.SPIKES:
             self.tilemap[tile_str] = {"pos": pos, "type": type}
 
-    def update_block_variants(self, new_block_pos, add: bool = True) -> int:
+    def update_block_variants(self, new_block_pos) -> int:
         surrounding_blocks = []
         for offset in OFFSETS:
             surrounding_block: str = self.pos_to_str(new_block_pos, offset)
@@ -109,33 +110,39 @@ class LevelEditor:
             except KeyError: pass
 
         
-        for block in surrounding_blocks: #could save tiles)around for every tile to optimize
+        for block in surrounding_blocks: #could save tiles_around for every tile to optimize
             tiles_around = {(0, -1) : False, (0, 1) : False, (-1, 0) : False,(1, 0) : False,}
             
             #find tiles aound
             for offset in OFFSETS:
-                if offset == (0, 0): pass
                 try:
                     if self.tilemap[self.pos_to_str(block, offset)]["type"] == Type.BLOCK: 
                         tiles_around[offset] = True
                 except KeyError: pass
+            tiles_around[(0, 0)] = False
 
             #update variant accordingly
-            
-            if [tiles_around[x] for x in tiles_around].count(True) in (3, 4): 
+            amount_around = [tiles_around[x] for x in tiles_around].count(True)
+            if  amount_around in (0, 1): 
                 block_str = "ALL"
-            elif [tiles_around[x] for x in tiles_around].count(True) == 0:
+            elif amount_around == 4:
                 block_str = "FREE"
-            else:
+            else: 
                 block_str = ""
-                if tiles_around[(0, -1)]: block_str = "TOP"
-                elif tiles_around[(0, 1)]: block_str = "BOTTOM"
+                if tiles_around[(0, -1)]: block_str += "TOP"
+                if tiles_around[(0, 1)]: block_str += "BOTTOM"
 
                 if tiles_around[(-1, 0)]: block_str += "LEFT"
-                elif tiles_around[(1, 0)]: block_str += "RIGHT"
+                if tiles_around[(1, 0)]: block_str += "RIGHT"
 
+                if block_str in ("TOPBOTTOM", "LEFTRIGHT"): block_str = "ALL" 
+                elif "TOPBOTTOM" in block_str:
+                    block_str = block_str[9:]
+                elif "LEFTRIGHT" in block_str:
+                    block_str = block_str[:-9]
+                    
             self.tilemap[self.pos_to_str(block)]["variant"] = eval("BlockVariants." + block_str)
-            print(eval("BlockVariants." + block_str))
+            #print("BlockVariants." + block_str)
     
     def pos_to_str(self, pos, offset = (0, 0)) ->str:
         return str(int(pos[0] + offset[0])) + ";" + str(int(pos[1] + offset[1]))

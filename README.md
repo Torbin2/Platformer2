@@ -7,7 +7,7 @@ controls: a/d - to move, space - jump, Lshift - flip, r - reload level/ respawn 
 - background image for menu and game
 
 - [x] level editor
-- [ ] auto conect block textures
+- [x] auto conect block textures
 
 - new blocks
 - - [ ] block that stops camera moving

@@ -9,6 +9,7 @@ pygame.init()
 pygame.display.set_caption('platformer2')
 
 
+
 open_menu = True
 menu = Menu()
 

@@ -11,16 +11,16 @@ class Type(Flag):
 
 class BlockVariants(): #not a enum D:
 
-    TOP: int = 1
-    RIGHT: int = 2
-    BOTTOM: int = 3
-    LEFT: int = 4
-    TOPLEFT: int = 5
-    TOPRIGHT: int = 6
-    BOTTOMRIGHT: int = 7
-    BOTTOMLEFT: int = 8
-    FREE: int = 9
-    ALL: int = 10
+    BOTTOM: int = 1 - 1
+    LEFT: int = 2 - 1
+    TOP: int = 3 - 1
+    RIGHT: int = 4 - 1
+    BOTTOMRIGHT: int = 5 - 1
+    BOTTOMLEFT: int = 6 - 1
+    TOPLEFT: int = 7 - 1
+    TOPRIGHT: int = 8 - 1
+    FREE: int = 9 - 1
+    ALL: int = 10 - 1
 
     
 
