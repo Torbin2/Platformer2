@@ -10,7 +10,7 @@ class Type(Flag):
     SPIKES = SPIKE_SNAKE | SPIKE_CUBE | SPIKE_CIRCLE
 
 class BlockVariants(): #not a enum D:
-
+    #where the surrounding blocks are = img_name - 1 (because zero-index)
     BOTTOM: int = 1 - 1
     LEFT: int = 2 - 1
     TOP: int = 3 - 1
@@ -21,6 +21,13 @@ class BlockVariants(): #not a enum D:
     TOPRIGHT: int = 8 - 1
     FREE: int = 9 - 1
     ALL: int = 10 - 1
+
+    TOPLEFT_CORNER : int = 11 - 1
+    TOPRIGHT_CORNER : int = 12 - 1
+    BOTTOMRIGHT_CORNER : int = 13 - 1
+    BOTTOMLEFT_CORNER : int = 14 - 1
+    TOPRIGHTBOTTOMLEFT_CORNER : int = 15 - 1
+    TOPLEFTBOTTOMRIGHT_CORNER: int  = 16 -1
 
     
 

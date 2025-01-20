@@ -5,6 +5,8 @@ from load_images import load_images, load_image
 from enums import Type, BlockVariants
 
 OFFSETS = [(0, -1),(0, 1),(-1, 0),(1, 0),(0,0) ]
+CORNER_OFFSETS = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
+OPPOSING_CORNER = { "BOTTOMRIGHT": (1,1), "TOPRIGHT" : (1,-1), "BOTTOMLEFT" : (-1, 1), "TOPLEFT" : (-1, -1)}
 
 class LevelEditor:
     def __init__(self, scale, level_name : str):
@@ -87,9 +89,10 @@ class LevelEditor:
 
         if remove: 
             if tile_str in self.tilemap:
+                sort = self.tilemap[tile_str]["type"]
                 self.tilemap.pop(tile_str)
 
-                if self.tilemap[tile_str]["type"] == Type.BLOCK:
+                if sort == Type.BLOCK:
                     self.update_block_variants(pos)
                 
             return
@@ -102,7 +105,7 @@ class LevelEditor:
 
     def update_block_variants(self, new_block_pos) -> int:
         surrounding_blocks = []
-        for offset in OFFSETS:
+        for offset in OFFSETS + CORNER_OFFSETS:
             surrounding_block: str = self.pos_to_str(new_block_pos, offset)
             try:
                 if self.tilemap[surrounding_block]["type"] == Type.BLOCK: 
@@ -122,25 +125,52 @@ class LevelEditor:
             tiles_around[(0, 0)] = False
 
             #update variant accordingly
+            
+            block_str = ""
             amount_around = [tiles_around[x] for x in tiles_around].count(True)
+
             if  amount_around in (0, 1): 
                 block_str = "ALL"
             elif amount_around == 4:
-                block_str = "FREE"
+                
+                corners = {(-1, -1) : False, (-1, 1): False, (1, -1): False, (1, 1): False}
+                missing= 0
+                for corner in CORNER_OFFSETS:          
+                    try:
+                        if self.tilemap[self.pos_to_str(block, corner)]["type"] == Type.BLOCK: 
+                            corners[corner] = True
+                        else: missing += 1
+                    except KeyError: missing += 1
+
+                if not corners[(-1, -1)]: block_str += "TOPLEFT"
+                elif not corners[(1, -1)]: block_str += "TOPRIGHT"
+
+                if not corners[(-1, 1)]: block_str += "BOTTOMLEFT"   
+                elif not corners[(1, 1)]: block_str += "BOTTOMRIGHT"
+
+                if block_str == "": block_str = "FREE"
+                elif missing in (3, 4) : block_str = "ALL"
+                elif block_str == "TOPLEFTBOTTOMLEFT": block_str = "RIGHT"
+                elif block_str == "TOPRIGHTBOTTOMRIGHT": block_str = "LEFT"
+                else: block_str += "_CORNER"
+            
             else: 
-                block_str = ""
+                
                 if tiles_around[(0, -1)]: block_str += "TOP"
                 if tiles_around[(0, 1)]: block_str += "BOTTOM"
 
                 if tiles_around[(-1, 0)]: block_str += "LEFT"
                 if tiles_around[(1, 0)]: block_str += "RIGHT"
 
-                if block_str in ("TOPBOTTOM", "LEFTRIGHT"): block_str = "ALL" 
-                elif "TOPBOTTOM" in block_str:
-                    block_str = block_str[9:]
-                elif "LEFTRIGHT" in block_str:
-                    block_str = block_str[:-9]
-                    
+                block_str = block_str.removeprefix("TOPBOTTOM").removesuffix("LEFTRIGHT")
+                
+                if block_str in OPPOSING_CORNER:
+                    try:
+                        if self.tilemap[self.pos_to_str(block, OPPOSING_CORNER[block_str])]["type"] != Type.BLOCK:
+                            block_str = "ALL"
+                    except KeyError: block_str = "ALL"
+                
+            if block_str == "": block_str = "ALL"
             self.tilemap[self.pos_to_str(block)]["variant"] = eval("BlockVariants." + block_str)
             #print("BlockVariants." + block_str)
     
