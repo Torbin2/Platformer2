@@ -1,15 +1,7 @@
-from enum import Enum, auto, Flag
+from enum import Enum, auto
 
-class Type(Flag):
 
-    BLOCK = auto()
-    SPIKE_SNAKE = auto()
-    SPIKE_CUBE = auto()
-    SPIKE_CIRCLE = auto()
-
-    SPIKES = SPIKE_SNAKE | SPIKE_CUBE | SPIKE_CIRCLE
-
-class BlockVariants(): #not a enum D:
+class BlockVariants(): #not an enum D:
     #where the surrounding blocks are = img_name - 1 (because zero-index)
     BOTTOM: int = 1 - 1
     LEFT: int = 2 - 1
@@ -29,16 +21,11 @@ class BlockVariants(): #not a enum D:
     TOPRIGHTBOTTOMLEFT_CORNER : int = 15 - 1
     TOPLEFTBOTTOMRIGHT_CORNER: int  = 16 -1
 
-    
 
 class PlayerState(Enum):
     GROUNDED = auto()
     AIR = auto()
 
+
 class Events(Enum):
     DEATH = auto()
-
-class TileShapes(Enum):
-    BLOCK = auto()
-    CIRCLE = auto()
-    SPIKE = auto()

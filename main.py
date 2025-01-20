@@ -1,9 +1,8 @@
 import pygame
 from player import Player
-from blocks import TileMap2 as Tilemap
+from blocks import TileMap
 from menu import Menu
 from load_images import load_image, load_images
-from enums import Type
 
 pygame.init()
 pygame.display.set_caption('platformer2')
@@ -21,7 +20,7 @@ class Game:
         self.apply_setting()
 
         self.player = Player(self.screen)
-        self.tilemap = Tilemap(self.screen, self.scale, self.use_textures, 'test')
+        self.tilemap = TileMap(self.screen, self.scale, self.use_textures, 'test')
 
 
         self.camera = [0, 0]

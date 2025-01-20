@@ -2,7 +2,6 @@ import pygame
 import json
 
 from load_images import load_images, load_image
-from enums import Type, BlockVariants
 
 OFFSETS = [(0, -1),(0, 1),(-1, 0),(1, 0),(0,0) ]
 CORNER_OFFSETS = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
