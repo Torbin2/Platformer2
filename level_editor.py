@@ -76,10 +76,13 @@ class LevelEditor:
         self.update_block_variants(pos)
 
     def update_block_variants(self, new_block_pos) -> None:
-        def should_connect(pos: tuple[int, int], offset: tuple[int, int] = (0, 0)) -> bool:
+        def should_connect(pos: tuple[int, int], offset: tuple[int, int] = (0, 0), allow_air: bool = False) -> bool:
             pos = (pos[0] + offset[0], pos[1] + offset[1])
             tile = self.tilemap.level.get(*pos)
-            return tile is not None and issubclass(tile.renderer.__class__, blocks.ConnectedSolidBlockRenderer)
+            if allow_air:
+                return tile is None or issubclass(tile.renderer.__class__, blocks.ConnectedSolidBlockRenderer)
+            else:
+                return tile is not None and issubclass(tile.renderer.__class__, blocks.ConnectedSolidBlockRenderer)
 
         surrounding_blocks = []
         for offset in OFFSETS + CORNER_OFFSETS:
@@ -106,24 +109,25 @@ class LevelEditor:
             elif amount_around == 4:
                 corners = {(-1, -1) : False, (-1, 1): False, (1, -1): False, (1, 1): False}
                 missing= 0
-                for corner in CORNER_OFFSETS:          
-                    try:
-                        if should_connect(block, corner):
-                            corners[corner] = True
-                        else: missing += 1
-                    except KeyError: missing += 1
+                for corner in CORNER_OFFSETS:
+                    if should_connect(block, corner):
+                        corners[corner] = True
+                    else:
+                        missing += 1
 
                 if not corners[(-1, -1)]: block_str += "TOPLEFT"
-                elif not corners[(1, -1)]: block_str += "TOPRIGHT"
+                if not corners[(1, -1)]: block_str += "TOPRIGHT"
 
                 if not corners[(-1, 1)]: block_str += "BOTTOMLEFT"   
-                elif not corners[(1, 1)]: block_str += "BOTTOMRIGHT"
+                if not corners[(1, 1)]: block_str += "BOTTOMRIGHT"
 
                 if block_str == "": block_str = "FREE"
                 elif missing in (3, 4) : block_str = "ALL"
                 elif block_str == "TOPLEFTBOTTOMLEFT": block_str = "RIGHT"
                 elif block_str == "TOPRIGHTBOTTOMRIGHT": block_str = "LEFT"
-                else: block_str += "_CORNER"
+                elif block_str == "TOPLEFTTOPRIGHT": block_str = "BOTTOM"
+                elif block_str == "BOTTOMLEFTBOTTOMRIGHT": block_str = "TOP"
+                else: block_str += "_NO_OPPOSITE_CORNER"
             
             else: 
                 
@@ -137,11 +141,13 @@ class LevelEditor:
                 
                 if block_str in OPPOSING_CORNER:
                     if should_connect(block, OPPOSING_CORNER[block_str]):
-                        block_str = "ALL"
-                    # TODO: @torbin_ 's logic worked differently around air (?)
+                        block_str += "_CORNER"
                 
             if block_str == "": block_str = "ALL"
-            self.tilemap.level.get(*block).renderer.texture_num = getattr(BlockVariants, block_str)
+
+            tile = self.tilemap.level.get(*block)
+            if tile is not None:
+                tile.renderer.texture_num = getattr(BlockVariants, block_str)
     
     def pos_to_str(self, pos: tuple[int, int], offset: tuple[int, int] = (0, 0)) -> tuple[int, int]:
         return pos[0] + offset[0], pos[1] + offset[1]

@@ -14,15 +14,21 @@ class BlockVariants(): #not an enum D:
     FREE: int = 9 - 1
     ALL: int = 10 - 1
 
-    TOPLEFT_CORNER : int = 11 - 1
-    TOPRIGHT_CORNER : int = 12 - 1
-    BOTTOMRIGHT_CORNER : int = 13 - 1
-    BOTTOMLEFT_CORNER : int = 14 - 1
-    TOPRIGHTBOTTOMLEFT_CORNER : int = 15 - 1
-    TOPLEFTBOTTOMRIGHT_CORNER: int  = 16 -1
+    TOPLEFT_NO_OPPOSITE_CORNER : int = 11 - 1
+    TOPRIGHT_NO_OPPOSITE_CORNER : int = 12 - 1
+    BOTTOMRIGHT_NO_OPPOSITE_CORNER : int = 13 - 1
+    BOTTOMLEFT_NO_OPPOSITE_CORNER : int = 14 - 1
+    TOPRIGHTBOTTOMLEFT_NO_OPPOSITE_CORNER : int = 15 - 1
+    TOPLEFTBOTTOMRIGHT_NO_OPPOSITE_CORNER: int  = 16 -1
 
     LEFTRIGHT: int = 17 - 1
     TOPBOTTOM: int = 18 - 1
+
+    # TOP BOTTOM LEFT RIGHT
+    BOTTOMRIGHT_CORNER: int = 19 - 1
+    BOTTOMLEFT_CORNER: int = 20 - 1
+    TOPLEFT_CORNER: int = 21 - 1
+    TOPRIGHT_CORNER: int = 22 - 1
 
 
 class PlayerState(Enum):
