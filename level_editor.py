@@ -133,7 +133,7 @@ class LevelEditor:
                 if tiles_around[(-1, 0)]: block_str += "LEFT"
                 if tiles_around[(1, 0)]: block_str += "RIGHT"
 
-                block_str = block_str.removeprefix("TOPBOTTOM").removesuffix("LEFTRIGHT")
+                block_str = block_str.removeprefix("TOPBOTTOM").removesuffix("LEFTRIGHT") or block_str
                 
                 if block_str in OPPOSING_CORNER:
                     if should_connect(block, OPPOSING_CORNER[block_str]):

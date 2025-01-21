@@ -21,6 +21,9 @@ class BlockVariants(): #not an enum D:
     TOPRIGHTBOTTOMLEFT_CORNER : int = 15 - 1
     TOPLEFTBOTTOMRIGHT_CORNER: int  = 16 -1
 
+    LEFTRIGHT: int = 17 - 1
+    TOPBOTTOM: int = 18 - 1
+
 
 class PlayerState(Enum):
     GROUNDED = auto()

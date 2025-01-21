@@ -2,7 +2,6 @@ import pygame
 from player import Player
 from blocks import TileMap
 from menu import Menu
-from load_images import load_image, load_images
 
 pygame.init()
 pygame.display.set_caption('platformer2')
