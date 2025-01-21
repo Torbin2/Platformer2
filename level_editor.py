@@ -1,5 +1,5 @@
+import math
 import pygame
-import json
 
 import blocks
 from enums import BlockVariants
@@ -47,8 +47,16 @@ class LevelEditor:
 
     def create_tiles(self, mouse_pos, remove: bool):
         offset_len = range(int(-0.5 * self.cursor_size), int(0.5 * self.cursor_size + 1))
-        block_pos = (round((mouse_pos[0] + self.camera[0] * self.scale) // (self.block_size * self.scale)),
-                    round((mouse_pos[1] + self.camera[1] * self.scale) // (self.block_size * self.scale)))
+
+        # rx = (tx - camera[0]) * tilemap.scale
+        # tx = rx / tilemap.scale + camera[0]
+        # where tx = ix * 10
+        # ix = (rx / tilemap.scale + camera[0]) / 10
+        # where  tilemap.scale = self.block_size / 10 * self.scale  and  rx = mouse_pos[0]
+        block_pos = (
+            math.floor((mouse_pos[0] / (self.block_size / 10 * self.scale) + self.camera[0]) / 10),
+            math.floor((mouse_pos[1] / (self.block_size / 10 * self.scale) + self.camera[1]) / 10)
+        )
 
         for x_offset in offset_len: 
             for y_offset in offset_len:
@@ -184,7 +192,8 @@ class LevelEditor:
             self.camera = [self.camera[0] + self.movement[0], self.camera[1] + self.movement[1]]
             self.screen.fill("black")
 
-            self.tilemap.scale = self.scale
+            self.tilemap.scale = self.block_size / 10 * self.scale
+            self.tilemap.scale_images()
             self.tilemap.render(self.camera)
 
             mouse_pos = pygame.mouse.get_pos() 

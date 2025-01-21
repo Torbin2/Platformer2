@@ -176,7 +176,8 @@ class SolidBlockRenderer(Renderer):
 
         rect = self.collider._rect
 
-        draw_rect = pygame.Rect((rect.left - camera[0]) * tilemap.scale, (rect.top - camera[1]) * tilemap.scale,
+        draw_rect = pygame.Rect(int((rect.left - camera[0]) * tilemap.scale),
+                                int((rect.top - camera[1]) * tilemap.scale),
                                 rect.width * tilemap.scale, rect.height * tilemap.scale)
 
         if tilemap.use_textures:
@@ -205,7 +206,7 @@ class Images(enum.StrEnum):
 
 
 class TileMap:
-    def __init__(self, screen_, scale_: int, use_textures: bool, level_name: str):
+    def __init__(self, screen_: pygame.Surface, scale_: int, use_textures: bool, level_name: str):
 
         self.screen = screen_
         self.scale = scale_
@@ -244,8 +245,10 @@ class TileMap:
         return getattr(self.TileTypes, name).duplicate()
 
     def render(self, camera_: list[int]):
-        for sy in range(-self._max_tile_size, 36 + self._max_tile_size):
-            for sx in range(-self._max_tile_size, 64 + self._max_tile_size):
+        width = int(self.screen.get_width() / 10 // self.scale)
+        height = int(self.screen.get_height() / 10 // self.scale)
+        for sy in range(-self._max_tile_size, height + self._max_tile_size):
+            for sx in range(-self._max_tile_size, width + self._max_tile_size):
                 x = sx + round(camera_[0] / 10)
                 y = sy + round(camera_[1] / 10)
 
