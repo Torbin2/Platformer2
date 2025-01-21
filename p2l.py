@@ -115,9 +115,9 @@ class LevelStore:
                     for x in range(self._chunk_size):
                         index: int = chunk.get((x, y), 0)
                         if last is not None and last != index:
-                            assert length != 0
-                            file.write((1 << 7).to_bytes(1))
-                            file.write(length.to_bytes(2))
+                            if length != 0:
+                                file.write((1 << 7).to_bytes(1))
+                                file.write(length.to_bytes(2))
                             length = 0
                             last = None
 
@@ -141,11 +141,8 @@ class LevelStore:
             'type': tile.type_name,
             'tile': tile.serialise(),
             'renderer': tile.renderer.serialise(),
-            'collider': tile.renderer.serialise()
+            'collider': tile.collider.serialise()
         }
-
-    def _deserialise_tile(self, params: dict[str, str]) -> 'blocks.Tile':
-        raise NotImplementedError()
 
     def load(self, tilemap: 'blocks.TileMap2') -> None:
         self._tiles = {}
@@ -236,10 +233,24 @@ class LevelStore:
                 raise ValueError(f'Expected end marker, got {marker}')
 
     def get(self, x: int, y: int) -> 'blocks.Tile' | None:
+        if type(x) is not int:
+            raise ValueError()
+        if type(y) is not int:
+            raise ValueError()
+
         if (x, y) in self._tiles:
             return self._tiles[(x, y)]
         else:
             return None
 
-    def set(self, x: int, y: int, value: 'blocks.Tile') -> None:
-        self._tiles[(x, y)] = value
+    def set(self, x: int, y: int, value: 'blocks.Tile' | None) -> None:
+        if type(x) is not int:
+            raise ValueError()
+        if type(y) is not int:
+            raise ValueError()
+
+        if value is None:
+            if (x, y) in self._tiles:
+                self._tiles.pop((x, y))
+        else:
+            self._tiles[(x, y)] = value

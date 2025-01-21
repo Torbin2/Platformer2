@@ -3,7 +3,7 @@ import json
 
 from os import listdir
 
-# from level_editor import LevelEditor
+from level_editor import LevelEditor
 
 
 FONT_SIZE = 35
@@ -100,8 +100,8 @@ class Menu:
                             match self.selected:
                                 case 0:
                                     self.run = False
-                                # case 1:
-                                #     LevelEditor(self.scale, self.settings["level"]).main()
+                                case 1:
+                                    LevelEditor(self.scale, self.settings["level"]).main()
                                 case 2: self.viewing = 'settings'
                                 case 3:
                                     pygame.quit()

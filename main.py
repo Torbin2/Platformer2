@@ -20,7 +20,7 @@ class Game:
         self.apply_setting()
 
         self.player = Player(self.screen)
-        self.tilemap = TileMap(self.screen, self.scale, self.use_textures, 'test')
+        self.tilemap = TileMap(self.screen, self.scale, self.use_textures, self.settings['level'])
 
 
         self.camera = [0, 0]

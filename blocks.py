@@ -159,9 +159,14 @@ class BlockCollider(Collider):
 
 
 class SolidBlockRenderer(Renderer):
+    _DEFAULT_TEXTURE_NUM = 1
 
-    def __init__(self, collider: BlockCollider):
+    def __init__(self, collider: BlockCollider, texture_num: int | None = None):
         self.collider = collider
+
+        if texture_num is None:
+            texture_num = self._DEFAULT_TEXTURE_NUM
+        self.texture_num = texture_num
 
     def render(self, screen: pygame.Surface, camera: list[int], tilemap: TileMap) -> None:
         if not isinstance(self.collider, BlockCollider):
@@ -174,9 +179,21 @@ class SolidBlockRenderer(Renderer):
 
         if tilemap.use_textures:
             # TODO: blocks can have different textures
-            screen.blit(tilemap.images[Images.BLOCKS][0], draw_rect.topleft)
+            screen.blit(tilemap.images[Images.BLOCKS][self.texture_num], draw_rect.topleft)
         else:
             pygame.draw.rect(screen, "orange", draw_rect)
+
+    def serialise(self) -> dict[str, typing.Any]:
+        if self.texture_num == self._DEFAULT_TEXTURE_NUM:
+            return {}
+        else:
+            return {
+                'texture_num': self.texture_num
+            }
+
+
+class ConnectedSolidBlockRenderer(SolidBlockRenderer):
+    pass
 
 
 class Images(enum.StrEnum):
@@ -191,10 +208,9 @@ class TileMap:
         self.screen = screen_
         self.scale = scale_
         self.use_textures = use_textures
-        self.images = []
 
         class TileTypes:
-            BLOCK = TileFactory(renderer_type=SolidBlockRenderer, collider_type=BlockCollider, tile_type=SolidBlock)
+            BLOCK = TileFactory(renderer_type=ConnectedSolidBlockRenderer, collider_type=BlockCollider, tile_type=SolidBlock)
 
         for tile_name in dir(TileTypes):
             if tile_name.startswith('_'):
