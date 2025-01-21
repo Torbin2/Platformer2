@@ -1,6 +1,9 @@
-import pygame
-from enums import PlayerState, Events
 from math import ceil
+
+import pygame
+
+import blocks
+from enums import PlayerState, Events
 
 OFFSETS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0),(1, 1),
            (0, 2), (0,-2)]
@@ -75,7 +78,17 @@ class Player:
 
         else: self.keys_pressed["r"] = False
 
-    def apply_mov(self, blocks): #and collison with blocks
+    def die(self) -> None:
+        print(f"Player died at {self.rect.x // 10}, {self.rect.y // 10}")
+        self.rect.center = (20, 20)
+
+    def handle_events(self, collider: blocks.Collider, events: Events) -> None:
+        if events == Events.DEATH:
+            self.die()
+        else:
+            raise NotImplementedError(events)
+
+    def apply_mov(self, tilemap: blocks.TileMap): #and collison with blocks
         # left & right (back and forth (Sisphus reference>!!!!!!???))
 
         repeats = ceil(abs(self.speed[0]) / 10) + 1
@@ -84,30 +97,27 @@ class Player:
         for i in range(repeats):
             
             self.rect.centerx += stepx
-            
-            player_pos = [self.rect.centerx // 10, self.rect.centery // 10]
-
-            blocks_around = []
-
-            for offset in OFFSETS:
-                tile = (player_pos[0] + offset[0], player_pos[1] + offset[1])
-                if tile in blocks:
-                    blocks_around.append(tile)
 
 
-            for i in blocks_around:
-                if self.rect.colliderect(blocks[i].rect):
-                    if self.speed[0] > 0: 
-                        self.rect.right = blocks[i].rect.left
+            for collider, events in tilemap.collide(self.rect):
+                if events is None:
+                    if not isinstance(collider, blocks.BlockCollider):
+                        raise NotImplementedError()
+                    rect = collider._rect
+
+                    if self.speed[0] > 0:
+                        self.rect.right = rect.left
                         self.speed[0] -= 4 * PhYSICS_MOD
                         if self.speed[0] < 0: self.speed[0] = 0 #in case of direction shift by collision
                         break
 
                     elif self.speed[0] < 0:
-                        self.rect.left = blocks[i].rect.right
+                        self.rect.left = rect.right
                         self.speed[0] += 4 * PhYSICS_MOD
                         if self.speed[0] > 0: self.speed[0] = 0#in case of direction shift by collision
                         break
+                else:
+                    self.handle_events(collider, events)
             else:
                 continue
             break
@@ -128,29 +138,27 @@ class Player:
                                             self.rect.top - 9 + (22 * (self.gravity + 1) / 2),
                                             9, 12) # Makes player grounded earlier
 
-            player_pos = [self.rect.centerx // 10, self.rect.centery // 10]
-
-            blocks_around = []
-
-            for offset in OFFSETS:
-                tile = (player_pos[0] + offset[0], player_pos[1] + offset[1])
-                if tile in blocks:
-                    blocks_around.append(tile)
-
-            for i in blocks_around:
-                if ground_check_rect.colliderect(blocks[i].rect):
+            for _, events in tilemap.collide(ground_check_rect):
+                if events is None:
                     if (self.speed[1] > 0 and self.gravity == 1) or (self.speed[1] < 0 and self.gravity == -1):
                         ground_touch = True
 
-                if self.rect.colliderect(blocks[i].rect):
+            for collider, events in tilemap.collide(self.rect):
+                if events is None:
+                    if not isinstance(collider, blocks.BlockCollider):
+                        raise NotImplementedError()
+                    rect = collider._rect
+
                     if self.speed[1] > 0:
-                        self.rect.bottom = blocks[i].rect.top
+                        self.rect.bottom = rect.top
                         self.speed[1] = 0
                         break
                     elif self.speed[1] < 0:
-                        self.rect.top = blocks[i].rect.bottom
+                        self.rect.top = rect.bottom
                         self.speed[1] = 0
                         break
+                else:
+                    self.handle_events(collider, events)
             else:
                 continue
             break
@@ -188,24 +196,6 @@ class Player:
 
         return camera
 
-    def collison(self, tiles): #with non-blocks
-        player_pos = [self.rect.centerx // 10 , self.rect.centery // 10]
-
-        tiles_around = []
-
-        for offset in OFFSETS:
-            tile = (player_pos[0] + offset[0], player_pos[1] + offset[1])
-            if tile in tiles:
-                if tiles[tile].type != "block":
-                    tiles_around.append(tile)
-
-        for tile in tiles_around:
-            event = tiles[tile].collision_logic(self.rect)
-            match event:
-                case Events.DEATH:
-                    print(f"hit by {tile}")
-                    self.rect.center = (20, 20)
-
     def draw(self, camera, scale):
         drawn_rect = pygame.Rect((self.rect.left - camera[0]) * scale, (self.rect.top - camera[1])* scale, self.rect.width* scale, self.rect.height* scale)
         
@@ -219,8 +209,7 @@ class Player:
         pygame.draw.rect(self.screen, color, drawn_rect)
 
 
-    def update(self, tiles, blocks):
+    def update(self, tilemap: blocks.TileMap):
         self.input()
-        self.apply_mov(blocks)
+        self.apply_mov(tilemap)
         self.friction()
-        self.collison(tiles)

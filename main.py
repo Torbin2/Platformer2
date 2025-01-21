@@ -36,8 +36,8 @@ class Game:
         self.use_textures: bool = self.settings["textures"]
 
         try:
-            self.tilemap.reload_level(self.scale)
-        except:
+            self.tilemap.level.load(self.tilemap)
+        except Exception:
             pass
 
 
@@ -50,11 +50,11 @@ class Game:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         self.apply_setting()
-                    # if event.key == pygame.K_r:
-                        # self.tilemap.reload_level(self.scale)
+                    if event.key == pygame.K_r:
+                        self.tilemap.level.load(self.tilemap)
 
             self.screen.fill("black")
-            #self.player.update(self.tilemap.tiles, self.tilemap.blocks)
+            self.player.update(self.tilemap)
             
             #draw
             self.camera = self.player.update_camera(self.camera)

@@ -18,7 +18,7 @@ class Collider(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def check_collision(self, other: Collider) -> tuple[bool, Events | None]:
+    def check_collision(self, other: pygame.Rect) -> tuple[bool, Events | None]:
         pass
 
     def serialise(self) -> dict[str, typing.Any]:
@@ -120,11 +120,12 @@ class Tile(abc.ABC):
         self.renderer = renderer
         self.type_name = type_name
 
-    def collision(self, other: Collider) -> tuple[bool, Events | None]:
+    def collision(self, other: pygame.Rect) -> tuple[bool, Events | None]:
         return self.collider.check_collision(other)
 
+    @classmethod
     @abc.abstractmethod
-    def on_collision(self, other: Tile) -> tuple[bool, Events | None]:
+    def on_collision(cls, other: pygame.Rect) -> tuple[bool, Events | None]:
         """:return If player should collide"""
         pass
 
@@ -141,21 +142,22 @@ class SolidBlock(Tile):
     # def __init__(self, collider: Collider, renderer: Renderer):
     #     super().__init__(collider, renderer)
 
-    def on_collision(self, other: Tile):
+    @classmethod
+    def on_collision(cls, other: pygame.Rect):
         return True, None
 
 
 class BlockCollider(Collider):
 
-    def __init__(self, on_collision: collections.abc.Callable[[Collider], tuple[bool, Events | None]], x: int, y: int):
+    def __init__(self, on_collision: collections.abc.Callable[[pygame.Rect], tuple[bool, Events | None]], x: int, y: int):
         self._on_collision = on_collision
         self._rect = pygame.Rect(x * 10, y * 10, 10, 10)
 
-    def check_collision(self, other: Collider) -> tuple[bool, Events | None]:
-        if not isinstance(other, self.__class__):
-            raise NotImplemented
-        if self._rect.colliderect(other._rect):
+    def check_collision(self, other: pygame.Rect) -> tuple[bool, Events | None]:
+        if self._rect.colliderect(other):
             return self._on_collision(other)
+        else:
+            return False, None
 
 
 class SolidBlockRenderer(Renderer):
@@ -209,6 +211,8 @@ class TileMap:
         self.scale = scale_
         self.use_textures = use_textures
 
+        self._max_tile_size = 1
+
         class TileTypes:
             BLOCK = TileFactory(renderer_type=ConnectedSolidBlockRenderer, collider_type=BlockCollider, tile_type=SolidBlock)
 
@@ -240,8 +244,8 @@ class TileMap:
         return getattr(self.TileTypes, name).duplicate()
 
     def render(self, camera_: list[int]):
-        for sy in range(-1, 36 + 1):
-            for sx in range(-1, 64 + 1):
+        for sy in range(-self._max_tile_size, 36 + self._max_tile_size):
+            for sx in range(-self._max_tile_size, 64 + self._max_tile_size):
                 x = sx + round(camera_[0] / 10)
                 y = sy + round(camera_[1] / 10)
 
@@ -250,6 +254,17 @@ class TileMap:
                     continue
 
                 tile.render(self.screen, camera_, self)
+
+    def collide(self, player: pygame.Rect) -> list[tuple[Collider, Events | None]]:
+        out = []
+        for x in range((player.left // 10) - self._max_tile_size, (player.right // 10) + self._max_tile_size):
+            for y in range((player.top // 10) - self._max_tile_size,
+                           (player.bottom // 10) + self._max_tile_size):
+                if (tile := self.level.get(x, y)) is not None:
+                    collided, event = tile.collider.check_collision(player)
+                    if collided or event is not None:
+                        out.append((tile.collider, event))
+        return out
 
     def scale_images(self) -> None:
         size = round(self.scale * 10)
