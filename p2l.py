@@ -48,7 +48,7 @@ import os
 import json
 import typing
 
-import blocks
+import levelmap
 
 LEVELS_DIR = 'levels'
 
@@ -60,11 +60,11 @@ class LevelStore:
         self._level_name = level_name
         self._level_path = os.path.join(LEVELS_DIR, self._level_name + '.p2l')
 
-        self._tiles: dict[tuple[int, int], blocks.Tile] = {}
+        self._tiles: dict[tuple[int, int], levelmap.Tile] = {}
 
         self._chunk_size = 256
 
-    def save(self, tilemap: 'blocks.TileMap2') -> None:
+    def save(self, tilemap: 'levelmap.TileMap2') -> None:
         # dict[tile_params: str::json, index: int]
         tile_to_index: dict[str, int] = {}
         current_index = 1  # The first index is air
@@ -136,7 +136,7 @@ class LevelStore:
             file.write(b'\x00')  # EOF marker
 
     @staticmethod
-    def _serialise_tile(tile: 'blocks.Tile') -> dict[str, str]:
+    def _serialise_tile(tile: 'levelmap.Tile') -> dict[str, str]:
         return {
             'type': tile.type_name,
             'tile': tile.serialise(),
@@ -144,11 +144,12 @@ class LevelStore:
             'collider': tile.collider.serialise()
         }
 
-    def load(self, tilemap: 'blocks.TileMap2') -> None:
+    def load(self, tilemap: 'levelmap.TileMap2') -> None:
         self._tiles = {}
         if not os.path.exists(self._level_path):
-            print('Level not found, creating a new, empty level')
-            return
+            print('remove .json from level in settings') 
+            raise FileExistsError("Level not found, selected file : ",self._level_path )
+            
 
         with open(self._level_path, 'rb') as file:
             if file.read(len(self._magic)) != self._magic:
@@ -171,7 +172,7 @@ class LevelStore:
                 f.add_collider(None, None, params['collider'])
                 return f.create(x, y)
 
-            def create_tile_from_index(index: int, x: int, y: int) -> blocks.Tile:
+            def create_tile_from_index(index: int, x: int, y: int) -> levelmap.Tile:
                 params = index_to_tile[index]
                 return create_tile_from_params(x, y, params)
 
@@ -232,7 +233,7 @@ class LevelStore:
             if marker != b'\x00':
                 raise ValueError(f'Expected end marker, got {marker}')
 
-    def get(self, x: int, y: int) -> 'blocks.Tile' | None:
+    def get(self, x: int, y: int) -> 'levelmap.Tile' | None:
         if type(x) is not int:
             raise ValueError()
         if type(y) is not int:
@@ -243,7 +244,7 @@ class LevelStore:
         else:
             return None
 
-    def set(self, x: int, y: int, value: 'blocks.Tile' | None) -> None:
+    def set(self, x: int, y: int, value: 'levelmap.Tile' | None) -> None:
         if type(x) is not int:
             raise ValueError()
         if type(y) is not int:

@@ -1,1 +1,1 @@
-{"window_size": 4, "textures": true, "high_fps": true, "sound": true, "level": "test_theTest.json"}
+{"window_size": 4, "textures": true, "high_fps": false, "sound": true, "level": "level1.json"}

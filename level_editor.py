@@ -1,7 +1,7 @@
 import math
 import pygame
 
-import blocks
+import levelmap
 from enums import BlockVariants
 
 OFFSETS = [(0, -1),(0, 1),(-1, 0),(1, 0),(0,0) ]
@@ -15,7 +15,7 @@ class LevelEditor:
         self.screen = pygame.display.set_mode((640 * self.scale, 360* self.scale))#16 *4: 9 * 4
         self.camera = [0, 0]
 
-        self.tilemap = blocks.TileMap(self.screen, self.scale, True, level_name)
+        self.tilemap = levelmap.TileMap(self.screen, self.scale, True, level_name)
         
         self.selected = {
             1: 'BLOCK',
@@ -80,9 +80,9 @@ class LevelEditor:
             pos = (pos[0] + offset[0], pos[1] + offset[1])
             tile = self.tilemap.level.get(*pos)
             if allow_air:
-                return tile is None or issubclass(tile.renderer.__class__, blocks.ConnectedSolidBlockRenderer)
+                return tile is None or issubclass(tile.renderer.__class__, levelmap.ConnectedSolidBlockRenderer)
             else:
-                return tile is not None and issubclass(tile.renderer.__class__, blocks.ConnectedSolidBlockRenderer)
+                return tile is not None and issubclass(tile.renderer.__class__, levelmap.ConnectedSolidBlockRenderer)
 
         surrounding_blocks = []
         for offset in OFFSETS + CORNER_OFFSETS:

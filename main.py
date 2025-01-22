@@ -1,6 +1,6 @@
 import pygame
 from player import Player
-from blocks import TileMap
+from levelmap import TileMap
 from menu import Menu
 
 pygame.init()

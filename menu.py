@@ -42,7 +42,7 @@ class Menu:
                         "options" : 210,
                         "quit" : 260}
         
-        self.available_levels : list[str] = sorted(listdir("levels/"))
+        self.available_levels : list[str] = sorted(list(map(lambda x: x.removesuffix(".p2l"),listdir("levels/"))))
         if self.settings["level"] not in self.available_levels: self.settings["level"] = self.available_levels[0]
 
 

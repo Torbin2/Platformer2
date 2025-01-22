@@ -2,7 +2,7 @@ from math import ceil
 
 import pygame
 
-import blocks
+import levelmap
 from enums import PlayerState, Events
 
 OFFSETS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0),(1, 1),
@@ -82,13 +82,13 @@ class Player:
         print(f"Player died at {self.rect.x // 10}, {self.rect.y // 10}")
         self.rect.center = (20, 20)
 
-    def handle_events(self, collider: blocks.Collider, events: Events) -> None:
+    def handle_events(self, collider: levelmap.Collider, events: Events) -> None:
         if events == Events.DEATH:
             self.die()
         else:
             raise NotImplementedError(events)
 
-    def apply_mov(self, tilemap: blocks.TileMap): #and collison with blocks
+    def apply_mov(self, tilemap: levelmap.TileMap): #and collison with blocks
         # left & right (back and forth (Sisphus reference>!!!!!!???))
 
         repeats = ceil(abs(self.speed[0]) / 10) + 1
@@ -101,7 +101,7 @@ class Player:
 
             for collider, events in tilemap.collide(self.rect):
                 if events is None:
-                    if not isinstance(collider, blocks.BlockCollider):
+                    if not isinstance(collider, levelmap.BlockCollider):
                         raise NotImplementedError()
                     rect = collider._rect
 
@@ -116,6 +116,7 @@ class Player:
                         self.speed[0] += 4 * PhYSICS_MOD
                         if self.speed[0] > 0: self.speed[0] = 0#in case of direction shift by collision
                         break
+                    else: print("AAAAAAAAAAAAAA")
                 else:
                     self.handle_events(collider, events)
             else:
@@ -131,7 +132,7 @@ class Player:
 
         ground_touch = False
 
-        for i in range(repeats):
+        for _ in range(repeats):
 
             self.rect.centery += stepy
             ground_check_rect = pygame.Rect(self.rect.x,
@@ -145,7 +146,7 @@ class Player:
 
             for collider, events in tilemap.collide(self.rect):
                 if events is None:
-                    if not isinstance(collider, blocks.BlockCollider):
+                    if not isinstance(collider, levelmap.BlockCollider):
                         raise NotImplementedError()
                     rect = collider._rect
 
@@ -209,7 +210,7 @@ class Player:
         pygame.draw.rect(self.screen, color, drawn_rect)
 
 
-    def update(self, tilemap: blocks.TileMap):
+    def update(self, tilemap: levelmap.TileMap):
         self.input()
         self.apply_mov(tilemap)
         self.friction()
