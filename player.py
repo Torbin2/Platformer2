@@ -185,7 +185,7 @@ class Player:
         except ZeroDivisionError: polarity = False
 
         #apply speed based on all of the above
-        if abs(self.speed[0]) - num < 0: self.speed[0] = 0
+        if abs(self.speed[0]) - num < 0 or num < 0.01: self.speed[0] = 0
         else: self.speed[0] -= num * polarity
 
 
