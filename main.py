@@ -35,7 +35,7 @@ class Game:
         self.use_textures: bool = self.settings["textures"]
 
         try:
-            self.tilemap.level.load(self.tilemap)
+            self.tilemap.refresh(self.scale, self.tilemap)
         except Exception:
             pass
 
