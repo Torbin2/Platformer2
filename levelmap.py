@@ -98,12 +98,12 @@ class TileFactory:
     def duplicate(self) -> TileFactory:
         return TileFactory(
             collider_type=self._collider_type,
-            collider_args=self._collider_args,
-            collider_kwargs=self._collider_kwargs,
+            collider_args=self._collider_args.copy(),
+            collider_kwargs=self._collider_kwargs.copy(),
 
             renderer_type=self._renderer_type,
-            renderer_args=self._renderer_args,
-            renderer_kwargs=self._renderer_kwargs,
+            renderer_args=self._renderer_args.copy(),
+            renderer_kwargs=self._renderer_kwargs.copy(),
 
             tile_type=self._tile_type,
             tile_type_name=self._tile_type_name,

@@ -173,6 +173,12 @@ class LevelEditor:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE: self.quit()
                     if event.key == pygame.K_SPACE: self.camera = [0, 0]
+
+                    # if event.key == pygame.K_t:
+                    #     print('updating block variants')
+                    #     for tile_pos in self.tilemap.level._tiles:
+                    #         self.update_block_variants(tile_pos)
+                    #     print('done')
                     
                     #movement
                     if event.key in (pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d):
