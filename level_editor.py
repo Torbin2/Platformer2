@@ -179,6 +179,7 @@ class LevelEditor:
                     #     for tile_pos in self.tilemap.level._tiles:
                     #         self.update_block_variants(tile_pos)
                     #     print('done')
+                    if event.key == pygame.K_e: self.block_size = 10
                     
                     #movement
                     if event.key in (pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d):
