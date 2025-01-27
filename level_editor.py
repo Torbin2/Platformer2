@@ -19,7 +19,7 @@ class LevelEditor:
         
         self.selected = {
             1: 'BLOCK',
-            # 2 : Type.SPIKE_CUBE,
+            2: 'SPIKE',
             # 3 : Type.SPIKE_SNAKE
         }
         self.bar = 0
@@ -210,5 +210,6 @@ class LevelEditor:
             if mouse_press[0] or mouse_press[2]:
                 self.create_tiles(mouse_pos, mouse_press[2])
 
+            print(self.clock.get_fps())
             self.clock.tick(60)
             pygame.display.update()

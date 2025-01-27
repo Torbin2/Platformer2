@@ -43,7 +43,13 @@ class Menu:
                         "quit" : 260}
         
         self.available_levels : list[str] = sorted(list(map(lambda x: x.removesuffix(".p2l"),listdir("levels/"))))
-        if self.settings["level"] not in self.available_levels: self.settings["level"] = self.available_levels[0]
+        if self.settings["level"] not in self.available_levels:
+            if self.available_levels:
+                level = self.available_levels[0]
+                print(f'Level does not exist, loading {level}')
+                self.settings["level"] = level
+            else:
+                raise EnvironmentError('No levels to load')
 
 
     def render(self):

@@ -44,17 +44,17 @@ class TileFactory:
 
     def __init__(self, **kwargs):
         # TODO: Deduplicate this code
-        self._tile_type: typing.Type | None = kwargs.get('tile_type', None)
-        self._tile_args: list | None = kwargs.get('tile_args', None)
-        self._tile_kwargs: dict | None = kwargs.get('tile_kwargs', None)
+        self._tile_type: typing.Type[Tile] | None = kwargs.get('tile_type', None)
+        self._tile_args: list = kwargs.get('tile_args', [])
+        self._tile_kwargs: dict = kwargs.get('tile_kwargs', {})
 
         self._collider_type: typing.Type | None = kwargs.get('collider_type', None)
-        self._collider_args: list | None = kwargs.get('collider_args', None)
-        self._collider_kwargs: dict | None = kwargs.get('collider_kwargs', None)
+        self._collider_args: list = kwargs.get('collider_args', [])
+        self._collider_kwargs: dict = kwargs.get('collider_kwargs', {})
 
         self._renderer_type: typing.Type | None = kwargs.get('renderer_type', None)
-        self._renderer_args: list | None = kwargs.get('renderer_args', None)
-        self._renderer_kwargs: dict | None = kwargs.get('renderer_kwargs', None)
+        self._renderer_args: list = kwargs.get('renderer_args', [])
+        self._renderer_kwargs: dict = kwargs.get('renderer_kwargs', {})
 
         self._tile_type_name: str | None = kwargs.get('tile_type_name', None)
 
@@ -62,22 +62,22 @@ class TileFactory:
         if tile_type is not None and not issubclass(tile_type, Tile):
             raise TypeError()
         self._tile_type = tile_type or self._tile_type
-        self._tile_args = args or self._tile_args
-        self._tile_kwargs = kwargs or self._tile_kwargs
+        self._tile_args += (args or [])
+        self._tile_kwargs |= (kwargs or {})
 
     def add_renderer(self, renderer_type: typing.Type | None, args: list | None, kwargs: dict | None):
         if renderer_type is not None and not issubclass(renderer_type, Renderer):
             raise TypeError()
         self._renderer_type = renderer_type or self._renderer_type
-        self._renderer_args = args or self._renderer_args
-        self._renderer_kwargs = kwargs or self._renderer_kwargs
+        self._renderer_args += (args or [])
+        self._renderer_kwargs |= (kwargs or {})
 
     def add_collider(self, collider_type: typing.Type | None, args: list | None, kwargs: dict | None):
         if collider_type is not None and not issubclass(collider_type, Collider):
             raise TypeError()
         self._collider_type = collider_type or self._collider_type
-        self._collider_args = args or self._collider_args
-        self._collider_kwargs = kwargs or self._collider_kwargs
+        self._collider_args += (args or [])
+        self._collider_kwargs |= (kwargs or {})
 
     def add_tile(self, tile_type: typing.Type):
         if not issubclass(tile_type, Tile):
@@ -147,6 +147,12 @@ class SolidBlock(Tile):
         return True, None
 
 
+class SpikeBlock(Tile):
+    @classmethod
+    def on_collision(cls, other: pygame.Rect):
+        return True, Events.DEATH
+
+
 class BlockCollider(Collider):
 
     def __init__(self, on_collision: collections.abc.Callable[[pygame.Rect], tuple[bool, Events | None]], x: int, y: int):
@@ -161,9 +167,16 @@ class BlockCollider(Collider):
 
 
 class SolidBlockRenderer(Renderer):
-    _DEFAULT_TEXTURE_NUM = 1
+    _DEFAULT_TEXTURE_NUM = 0
+    _DEFAULT_COLOR = "orange"
 
-    def __init__(self, collider: BlockCollider, texture_num: int | None = None):
+    def __init__(self, collider: BlockCollider, texture_num: int | None = None, image_name: str = None, color=_DEFAULT_COLOR):
+        if image_name is None:
+            raise ValueError('SolidBlockRenderer needs a texture')
+        self._image_name = image_name
+
+        self._color = color
+
         self.collider = collider
 
         if texture_num is None:
@@ -181,18 +194,31 @@ class SolidBlockRenderer(Renderer):
                                 rect.width * tilemap.scale, rect.height * tilemap.scale)
 
         if tilemap.use_textures:
-            # TODO: blocks can have different textures
-            screen.blit(tilemap.images[Images.BLOCKS][self.texture_num], draw_rect.topleft)
+            textures = tilemap.images[getattr(Images, self._image_name)]
+            if type(textures) is list:
+                texture = textures[self.texture_num]
+            else:
+                texture = textures
+            screen.blit(texture, draw_rect.topleft)
+
         else:
-            pygame.draw.rect(screen, "orange", draw_rect)
+            pygame.draw.rect(screen, self._color, draw_rect)
 
     def serialise(self) -> dict[str, typing.Any]:
-        if self.texture_num == self._DEFAULT_TEXTURE_NUM:
-            return {}
-        else:
-            return {
+        out = {
+            'image_name': self._image_name
+        }
+
+        if self.texture_num != self._DEFAULT_TEXTURE_NUM:
+            out.update({
                 'texture_num': self.texture_num
-            }
+            })
+        if self._color != self._DEFAULT_COLOR:
+            out.update({
+                'color': self._color
+            })
+
+        return out
 
 
 class ConnectedSolidBlockRenderer(SolidBlockRenderer):
@@ -202,7 +228,7 @@ class ConnectedSolidBlockRenderer(SolidBlockRenderer):
 class Images(enum.StrEnum):
     SNAKE = enum.auto()
     BLOCKS = enum.auto()
-    SPIKE_CUBE = enum.auto()
+    SPIKE_BLOCK = enum.auto()
 
 
 class TileMap:
@@ -215,7 +241,18 @@ class TileMap:
         self._max_tile_size = 1
 
         class TileTypes:
-            BLOCK = TileFactory(renderer_type=ConnectedSolidBlockRenderer, collider_type=BlockCollider, tile_type=SolidBlock)
+            BLOCK = TileFactory(
+                renderer_type=ConnectedSolidBlockRenderer,
+                renderer_kwargs={'image_name': 'BLOCKS', 'color': [28, 81, 117]},
+                collider_type=BlockCollider,
+                tile_type=SolidBlock
+            )
+            SPIKE = TileFactory(
+                renderer_type=SolidBlockRenderer,
+                renderer_kwargs={'image_name': 'SPIKE_BLOCK'},
+                collider_type=BlockCollider,
+                tile_type=SpikeBlock
+            )
 
         for tile_name in dir(TileTypes):
             if tile_name.startswith('_'):
@@ -234,7 +271,7 @@ class TileMap:
         self._images = {
             Images.SNAKE: load_image("snake.png"),
             Images.BLOCKS: load_images("tiles/"),
-            Images.SPIKE_CUBE: load_image("spike_cube.png")
+            Images.SPIKE_BLOCK: load_image("spike_cube.png")  # TODO: This is a duplicate of Images
         }
         self.images: dict
         self.scale_images()

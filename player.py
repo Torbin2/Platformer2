@@ -80,7 +80,7 @@ class Player:
 
     def die(self) -> None:
         print(f"Player died at {self.rect.x // 10}, {self.rect.y // 10}")
-        self.rect.center = (20, 20)
+        self.rect.center = (100, 100)
 
     def handle_events(self, collider: levelmap.Collider, events: Events) -> None:
         if events == Events.DEATH:

@@ -59,6 +59,7 @@ class LevelStore:
     def __init__(self, level_name: str):
         self._level_name = level_name
         self._level_path = os.path.join(LEVELS_DIR, self._level_name + '.p2l')
+        print('level_path:', self._level_path)
 
         self._tiles: dict[tuple[int, int], levelmap.Tile] = {}
 
@@ -147,9 +148,8 @@ class LevelStore:
     def load(self, tilemap: 'levelmap.TileMap2') -> None:
         self._tiles = {}
         if not os.path.exists(self._level_path):
-            print('remove .json from level in settings') 
-            raise FileExistsError("Level not found, selected file : ",self._level_path )
-            
+            print('Level not found, creating a new, empty level')
+            return
 
         with open(self._level_path, 'rb') as file:
             if file.read(len(self._magic)) != self._magic:

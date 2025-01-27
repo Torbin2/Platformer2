@@ -36,6 +36,7 @@ class Game:
 
         try:
             self.tilemap.refresh(self.scale, self.tilemap)
+            self.tilemap.use_textures = self.use_textures
         except Exception:
             pass
 
