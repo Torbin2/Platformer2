@@ -81,13 +81,14 @@ class Player:
 
     def die(self) -> None:
         print(f"Player died at {self.rect.x // 10}, {self.rect.y // 10}")
+        print(self.last_checkpoint)
         self.rect.center = self.last_checkpoint
 
     def handle_events(self, collider: levelmap.Collider, events: Events) -> None:
         match events:
             case Events.DEATH: self.die()
-            case Events.GET_CHECKPOINT: pass
-            
+            case Events.GET_CHECKPOINT: self.last_checkpoint = (self.rect.x, self.rect.y) #change this to use checkpoint center
+                
             case _:raise NotImplementedError(events)
             
         
@@ -120,7 +121,7 @@ class Player:
                         self.speed[0] += 4 * PhYSICS_MOD
                         if self.speed[0] > 0: self.speed[0] = 0#in case of direction shift by collision
                         break
-                    else: print("AAAAAAAAAAAAAA")
+                    else: pass
                 else:
                     self.handle_events(collider, events)
             else:
@@ -191,7 +192,6 @@ class Player:
         #apply speed based on all of the above
         if abs(self.speed[0]) - num < 0 or num < 0.01: self.speed[0] = 0
         else: self.speed[0] -= num * polarity
-
 
     def update_camera(self, camera):
 

@@ -154,8 +154,8 @@ class SpikeBlock(Tile):
 
 class CheckPoint(Tile):
     @classmethod
-    def on_collision(cls, checkpoint: pygame.Rect):
-        return True, Events.GET_CHECKPOINT, checkpoint.center
+    def on_collision(cls, other: pygame.Rect):
+        return True, Events.GET_CHECKPOINT
 
 class BlockCollider(Collider):
 
@@ -176,7 +176,7 @@ class NoneStandertSizeColider(Collider):
 
     def check_collision(self, other: pygame.Rect) -> tuple[bool, Events | None]:
         if self._rect.colliderect(other):
-            return self._on_collision(self._rect)
+            return self._on_collision(other) #isn't "other" just the player???
         else:
             return False, None
 
@@ -270,7 +270,14 @@ class TileMap:
             )
             CHECKPOINT = TileFactory(
                 renderer_type=SolidBlockRenderer,
-                renderer_kwargs={'image_name': 'CHECKPOINT'},
+                renderer_kwargs={'image_name': 'CHECKPOINT', "texture_num" : 0 },
+                collider_type=NoneStandertSizeColider,
+                collider_kwargs={"size" : (30, 30)},
+                tile_type=CheckPoint
+            )
+            TEMP = TileFactory(
+                renderer_type=SolidBlockRenderer,
+                renderer_kwargs={'image_name': 'CHECKPOINT', "texture_num" : 1 },
                 collider_type=NoneStandertSizeColider,
                 collider_kwargs={"size" : (30, 30)},
                 tile_type=CheckPoint

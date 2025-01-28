@@ -6,14 +6,12 @@ controls: a/d - to move, space - jump, Lshift - flip, r - reload level/ respawn 
 - [ ] allow levels to have meta_data (author name, best_time, finished)
 - [ ] background image for menu and game
 
-- [x] level editor
-- [x] auto conect block textures
-
 - new blocks
 - - [ ] block that stops camera moving
 - - [ ] death plane
-- - [ ] checkpoints
-- - [ ] finish
+- - [x] checkpoints
+- - - [ ] make last checkpoint hit have the "on" texture
+- - [ ] finish block
 
 
 

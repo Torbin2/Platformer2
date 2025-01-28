@@ -21,7 +21,8 @@ class LevelEditor:
         self.selected = {
             1: 'BLOCK',
             2: 'SPIKE',
-            3: 'CHECKPOINT'
+            3: 'CHECKPOINT',
+            4: 'TEMP',
             
             # 3 : Type.SPIKE_SNAKE
         }
