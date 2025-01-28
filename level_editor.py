@@ -12,7 +12,7 @@ class LevelEditor:
     def __init__(self, scale, level_name : str):
         self.scale = scale
 
-        self.screen = pygame.display.set_mode((640 * self.scale, 360* self.scale))#16 *4: 9 * 4
+        self.screen = pygame.display.set_mode((480 * self.scale, 270* self.scale))#16 *4: 9 * 4
         self.camera = [0, 0]
         self.mov_multiplier = 1
 
@@ -21,6 +21,8 @@ class LevelEditor:
         self.selected = {
             1: 'BLOCK',
             2: 'SPIKE',
+            3: 'CHECKPOINT'
+            
             # 3 : Type.SPIKE_SNAKE
         }
         self.bar = 0

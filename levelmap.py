@@ -152,6 +152,10 @@ class SpikeBlock(Tile):
     def on_collision(cls, other: pygame.Rect):
         return True, Events.DEATH
 
+class CheckPoint(Tile):
+    @classmethod
+    def on_collision(cls, checkpoint: pygame.Rect):
+        return True, Events.GET_CHECKPOINT, checkpoint.center
 
 class BlockCollider(Collider):
 
@@ -165,6 +169,16 @@ class BlockCollider(Collider):
         else:
             return False, None
 
+class NoneStandertSizeColider(Collider):
+    def __init__(self, on_collision: collections.abc.Callable[[pygame.Rect], tuple[bool, Events | None]], x: int, y: int, size: tuple[int, int]):
+        self._on_collision = on_collision
+        self._rect = pygame.Rect(x * 10, y * 10, size[0], size[1])
+
+    def check_collision(self, other: pygame.Rect) -> tuple[bool, Events | None]:
+        if self._rect.colliderect(other):
+            return self._on_collision(self._rect)
+        else:
+            return False, None
 
 class SolidBlockRenderer(Renderer):
     _DEFAULT_TEXTURE_NUM = 0
@@ -184,8 +198,8 @@ class SolidBlockRenderer(Renderer):
         self.texture_num = texture_num
 
     def render(self, screen: pygame.Surface, camera: list[int], tilemap: TileMap) -> None:
-        if not isinstance(self.collider, BlockCollider):
-            raise NotImplementedError()
+        if not isinstance(self.collider, BlockCollider) and not isinstance(self.collider, NoneStandertSizeColider):
+            raise NotImplementedError(self.collider, )
 
         rect = self.collider._rect
 
@@ -229,6 +243,7 @@ class Images(enum.StrEnum):
     SNAKE = enum.auto()
     BLOCKS = enum.auto()
     SPIKE_BLOCK = enum.auto()
+    CHECKPOINT = enum.auto()
 
 
 class TileMap:
@@ -253,6 +268,13 @@ class TileMap:
                 collider_type=BlockCollider,
                 tile_type=SpikeBlock
             )
+            CHECKPOINT = TileFactory(
+                renderer_type=SolidBlockRenderer,
+                renderer_kwargs={'image_name': 'CHECKPOINT'},
+                collider_type=NoneStandertSizeColider,
+                collider_kwargs={"size" : (30, 30)},
+                tile_type=CheckPoint
+            )
 
         for tile_name in dir(TileTypes):
             if tile_name.startswith('_'):
@@ -271,7 +293,8 @@ class TileMap:
         self._images = {
             Images.SNAKE: load_image("snake.png"),
             Images.BLOCKS: load_images("tiles/"),
-            Images.SPIKE_BLOCK: load_image("spike_cube.png")  # TODO: This is a duplicate of Images
+            Images.SPIKE_BLOCK: load_image("spike_cube.png") , # TODO: This is a duplicate of Images
+            Images.CHECKPOINT : load_images("checkpoint/"),
         }
         self.images: dict
         self.scale_images()
@@ -314,10 +337,10 @@ class TileMap:
         return out
 
     def scale_images(self) -> None:
-        size = round(self.scale * 10)
         self.images = {}
         for key in self._images:
+            size = lambda x : round(pygame.Surface.get_width(x) * self.scale)
             if type(self._images[key]) is list:
-                self.images[key] = [pygame.transform.scale(image, (size, size)) for image in self._images[key]]
+                self.images[key] = [pygame.transform.scale(image, (size(image), size(image))) for image in self._images[key]]
             else:
-                self.images[key] = pygame.transform.scale(self._images[key], (size, size))
+                self.images[key] = pygame.transform.scale(self._images[key], (size(self._images[key]), size(self._images[key])))

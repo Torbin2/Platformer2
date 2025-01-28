@@ -38,3 +38,4 @@ class PlayerState(Enum):
 
 class Events(Enum):
     DEATH = auto()
+    GET_CHECKPOINT = auto()

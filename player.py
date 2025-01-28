@@ -33,6 +33,8 @@ class Player:
         self.jumps = 2
         self.flips = 1
 
+        self.last_checkpoint: tuple[int, int] = (0, 0)
+
     def input(self):
         keys = pygame.key.get_pressed()
 
@@ -71,8 +73,7 @@ class Player:
 
             if not self.keys_pressed["r"]:
 
-                self.rect.x = 100
-                self.rect.y = 100
+                self.die()
 
             self.keys_pressed["r"] = True
 
@@ -80,13 +81,16 @@ class Player:
 
     def die(self) -> None:
         print(f"Player died at {self.rect.x // 10}, {self.rect.y // 10}")
-        self.rect.center = (100, 100)
+        self.rect.center = self.last_checkpoint
 
     def handle_events(self, collider: levelmap.Collider, events: Events) -> None:
-        if events == Events.DEATH:
-            self.die()
-        else:
-            raise NotImplementedError(events)
+        match events:
+            case Events.DEATH: self.die()
+            case Events.GET_CHECKPOINT: pass
+            
+            case _:raise NotImplementedError(events)
+            
+        
 
     def apply_mov(self, tilemap: levelmap.TileMap): #and collison with blocks
         # left & right (back and forth (Sisphus reference>!!!!!!???))
@@ -94,7 +98,7 @@ class Player:
         repeats = ceil(abs(self.speed[0]) / 10) + 1
         stepx = self.speed[0] / repeats
 
-        for i in range(repeats):
+        for _ in range(repeats):
             
             self.rect.centerx += stepx
 
