@@ -33,7 +33,8 @@ class Player:
         self.jumps = 2
         self.flips = 1
 
-        self.last_checkpoint: tuple[int, int] = (0, 0)
+        self.last_checkpoint_pos: tuple[int, int] = self.rect.center
+        self._last_checkpoint: levelmap.Tile | None = None
 
     def input(self):
         keys = pygame.key.get_pressed()
@@ -81,13 +82,30 @@ class Player:
 
     def die(self) -> None:
         print(f"Player died at {self.rect.x // 10}, {self.rect.y // 10}")
-        print(self.last_checkpoint)
-        self.rect.center = self.last_checkpoint
+        print(self.last_checkpoint_pos)
+        self.rect.center = self.last_checkpoint_pos
 
-    def handle_events(self, collider: levelmap.Collider, events: Events) -> None:
+        self.speed = [0.0, 0.0]
+        self.gravity = 1
+
+    def handle_events(self, collider: levelmap.Collider, events: Events, tilemap: levelmap.TileMap) -> None:
         match events:
             case Events.DEATH: self.die()
-            case Events.GET_CHECKPOINT: self.last_checkpoint = (self.rect.x, self.rect.y) #change this to use checkpoint center
+            case Events.GET_CHECKPOINT:
+                if not isinstance(collider, levelmap.BlockCollider):
+                    raise NotImplementedError()
+                rect = collider._rect
+                self.last_checkpoint_pos = rect.center
+
+                if self._last_checkpoint is not None:
+                    if not isinstance(self._last_checkpoint.renderer, levelmap.SolidBlockRenderer):
+                        raise ValueError()
+                    self._last_checkpoint.renderer.texture_num = 0
+
+                self._last_checkpoint = tilemap.level.get(rect.x // 10, rect.y // 10)
+                if not isinstance(self._last_checkpoint.renderer, levelmap.SolidBlockRenderer):
+                    raise ValueError()
+                self._last_checkpoint.renderer.texture_num = 1
                 
             case _:raise NotImplementedError(events)
             
@@ -123,7 +141,7 @@ class Player:
                         break
                     else: pass
                 else:
-                    self.handle_events(collider, events)
+                    self.handle_events(collider, events, tilemap)
             else:
                 continue
             break
@@ -164,7 +182,7 @@ class Player:
                         self.speed[1] = 0
                         break
                 else:
-                    self.handle_events(collider, events)
+                    self.handle_events(collider, events, tilemap)
             else:
                 continue
             break

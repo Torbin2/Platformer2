@@ -152,16 +152,17 @@ class SpikeBlock(Tile):
     def on_collision(cls, other: pygame.Rect):
         return True, Events.DEATH
 
+
 class CheckPoint(Tile):
     @classmethod
     def on_collision(cls, other: pygame.Rect):
         return True, Events.GET_CHECKPOINT
 
-class BlockCollider(Collider):
 
-    def __init__(self, on_collision: collections.abc.Callable[[pygame.Rect], tuple[bool, Events | None]], x: int, y: int):
+class BlockCollider(Collider):
+    def __init__(self, on_collision: collections.abc.Callable[[pygame.Rect], tuple[bool, Events | None]], x: int, y: int, size: tuple[int, int] = (10, 10)):
         self._on_collision = on_collision
-        self._rect = pygame.Rect(x * 10, y * 10, 10, 10)
+        self._rect = pygame.Rect(x * 10, y * 10, size[0], size[1])
 
     def check_collision(self, other: pygame.Rect) -> tuple[bool, Events | None]:
         if self._rect.colliderect(other):
@@ -169,16 +170,8 @@ class BlockCollider(Collider):
         else:
             return False, None
 
-class NoneStandertSizeColider(Collider):
-    def __init__(self, on_collision: collections.abc.Callable[[pygame.Rect], tuple[bool, Events | None]], x: int, y: int, size: tuple[int, int]):
-        self._on_collision = on_collision
-        self._rect = pygame.Rect(x * 10, y * 10, size[0], size[1])
+    # TODO: should we save the size?
 
-    def check_collision(self, other: pygame.Rect) -> tuple[bool, Events | None]:
-        if self._rect.colliderect(other):
-            return self._on_collision(other) #isn't "other" just the player???
-        else:
-            return False, None
 
 class SolidBlockRenderer(Renderer):
     _DEFAULT_TEXTURE_NUM = 0
@@ -198,7 +191,7 @@ class SolidBlockRenderer(Renderer):
         self.texture_num = texture_num
 
     def render(self, screen: pygame.Surface, camera: list[int], tilemap: TileMap) -> None:
-        if not isinstance(self.collider, BlockCollider) and not isinstance(self.collider, NoneStandertSizeColider):
+        if not isinstance(self.collider, BlockCollider):
             raise NotImplementedError(self.collider, )
 
         rect = self.collider._rect
@@ -271,15 +264,8 @@ class TileMap:
             CHECKPOINT = TileFactory(
                 renderer_type=SolidBlockRenderer,
                 renderer_kwargs={'image_name': 'CHECKPOINT', "texture_num" : 0 },
-                collider_type=NoneStandertSizeColider,
-                collider_kwargs={"size" : (30, 30)},
-                tile_type=CheckPoint
-            )
-            TEMP = TileFactory(
-                renderer_type=SolidBlockRenderer,
-                renderer_kwargs={'image_name': 'CHECKPOINT', "texture_num" : 1 },
-                collider_type=NoneStandertSizeColider,
-                collider_kwargs={"size" : (30, 30)},
+                collider_type=BlockCollider,
+                collider_kwargs={"size": (30, 30)},
                 tile_type=CheckPoint
             )
 

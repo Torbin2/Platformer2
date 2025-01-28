@@ -22,7 +22,6 @@ class LevelEditor:
             1: 'BLOCK',
             2: 'SPIKE',
             3: 'CHECKPOINT',
-            4: 'TEMP',
             
             # 3 : Type.SPIKE_SNAKE
         }
