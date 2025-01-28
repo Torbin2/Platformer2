@@ -6,7 +6,7 @@ from os import listdir
 from level_editor import LevelEditor
 
 
-FONT_SIZE = 35
+FONT_SIZE = 30
 class Menu:
     def __init__(self):
 
@@ -15,7 +15,7 @@ class Menu:
                 self.settings = json.load(f)
         except FileNotFoundError:
             self.settings = {
-                "window_size": 2,
+                "window_size": 1,
                 "textures" : False,
                 "high_fps": False,
                 "sound": False,
@@ -24,9 +24,9 @@ class Menu:
             with open("settings.json", "w") as f:
                 json.dump(self.settings, f)
         
-        self.scale = self.settings["window_size"]
+        self.scale = self.settings["window_size"] * 2
 
-        self.screen = pygame.display.set_mode((640 * self.scale, 360* self.scale))#16 *4: 9 * 4  
+        self.screen = pygame.display.set_mode((480 * self.scale, 270* self.scale))#16 *4: 9 * 4  
         self.clock = pygame.time.Clock()
         
         self.font = pygame.font.Font(pygame.font.get_default_font(), FONT_SIZE* self.scale)
@@ -37,10 +37,10 @@ class Menu:
         self.viewing = "main"
         self.selected = 0
         
-        self.options = {"start" : 60,
+        self.options = {"start" : 50,
                         "level_editor" : 110,
-                        "options" : 210,
-                        "quit" : 260}
+                        "options" : 155,
+                        "quit" : 190}
         
         self.available_levels : list[str] = sorted(list(map(lambda x: x.removesuffix(".p2l"),listdir("levels/"))))
         if self.settings["level"] not in self.available_levels:
@@ -116,7 +116,7 @@ class Menu:
                         elif self.viewing == 'settings': 
                             match sorted(self.settings)[self.selected] if self.selected < len(self.settings) else "back":
                                 case "window_size": 
-                                    if self.settings["window_size"] >= 9: self.settings["window_size"] = 1 
+                                    if self.settings["window_size"] >= 4: self.settings["window_size"] = 1 
                                     else: self.settings["window_size"] += 1
                                 
                                 case "level": 

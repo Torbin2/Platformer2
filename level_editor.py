@@ -14,6 +14,7 @@ class LevelEditor:
 
         self.screen = pygame.display.set_mode((640 * self.scale, 360* self.scale))#16 *4: 9 * 4
         self.camera = [0, 0]
+        self.mov_multiplier = 1
 
         self.tilemap = levelmap.TileMap(self.screen, self.scale, True, level_name)
         
@@ -183,7 +184,7 @@ class LevelEditor:
                     
                     #movement
                     if event.key in (pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d):
-                        self.movement = (int(self.directions[event.key][0]) * 20, int(self.directions[event.key][1] * 20))
+                        self.movement = (int(self.directions[event.key][0]) * 20 * self.mov_multiplier, int(self.directions[event.key][1] * 20 * self.mov_multiplier))
                         self.directions[event.key][2] = True
                     
                     #tile selection
@@ -217,6 +218,10 @@ class LevelEditor:
             if mouse_press[0] or mouse_press[2]:
                 self.create_tiles(mouse_pos, mouse_press[2])
 
-            print(self.clock.get_fps())
+            if self.clock.get_fps() < 25:
+                self.mov_multiplier = 10
+                print(self.clock.get_fps())
+            else: self.mov_multiplier = 1
+            
             self.clock.tick(60)
             pygame.display.update()
