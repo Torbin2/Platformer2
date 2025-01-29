@@ -87,6 +87,8 @@ class Player:
 
         self.speed = [0.0, 0.0]
         self.gravity = 1
+        self.jumps = 2
+        self.flips = 1
 
     def handle_events(self, collider: levelmap.Collider, events: Events, tilemap: levelmap.TileMap) -> None:
         match events:
