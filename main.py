@@ -6,7 +6,7 @@ from menu import Menu
 pygame.init()
 pygame.display.set_caption('platformer2')
 
-
+SCREEN_SIZE = (960, 540)
 
 open_menu = True
 menu = Menu()
@@ -29,7 +29,7 @@ class Game:
         self.settings = menu.settings
 
         self.scale = self.settings["window_size"]
-        self.screen = pygame.display.set_mode((960 * self.scale , 540 * self.scale)) #16:9 ratio
+        self.screen = pygame.display.set_mode((SCREEN_SIZE[0] * self.scale , SCREEN_SIZE[1] * self.scale)) #16:9 ratio
 
         self.fps = 60 + (60 * self.settings["high_fps"])
         self.use_textures: bool = self.settings["textures"]
