@@ -17,7 +17,7 @@ class Player:
 
     def __init__(self, screen):
         
-        self.rect = pygame.Rect(231, 109, 9, 19)
+        self.rect = pygame.Rect(0, 0, 9, 19)
         self.speed = [0,0]
         self.screen = screen
 
@@ -27,11 +27,12 @@ class Player:
                              "a/d": False,
                              "r": False}
 
-        self.gravity = -1 #1 is down, -1 is up
+        self.gravity = 1 #1 is down, -1 is up
 
         self.state = PlayerState.GROUNDED
-        self.jumps = 2
-        self.flips = 1
+        self.default_values = {"jumps" : 2, "flips" : 1}
+        self.jumps = self.default_values["jumps"]
+        self.flips = self.default_values["flips"]
 
         self.last_checkpoint_pos: tuple[int, int] = self.rect.center
         self._last_checkpoint: levelmap.Tile | None = None
@@ -87,8 +88,9 @@ class Player:
 
         self.speed = [0.0, 0.0]
         self.gravity = 1
-        self.jumps = 2
-        self.flips = 1
+        self.jumps = self.default_values["jumps"]
+        self.flips = self.default_values["flips"]
+
 
     def handle_events(self, collider: levelmap.Collider, events: Events, tilemap: levelmap.TileMap) -> None:
         match events:
@@ -191,8 +193,8 @@ class Player:
 
         if ground_touch:
             self.state = PlayerState.GROUNDED
-            self.flips = 1
-            self.jumps = 2
+            self.flips = self.default_values["flips"]
+            self.jumps = self.default_values["jumps"]
         else: self.state = PlayerState.AIR
 
     def friction(self):
@@ -200,6 +202,7 @@ class Player:
         if self.keys_pressed["a/d"] == True:
             mult = 1
         else: mult = 10
+
 
         #higher if grounded
         if self.state == PlayerState.GROUNDED: num = abs(self.speed[0]) /  20 * mult #makes friction 1/50 * mul from speed

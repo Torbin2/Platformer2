@@ -34,11 +34,11 @@ class Game:
         self.fps = 60 + (60 * self.settings["high_fps"])
         self.use_textures: bool = self.settings["textures"]
 
-        try:
-            self.tilemap.refresh(self.scale, self.tilemap)
-            self.tilemap.use_textures = self.use_textures
-        except Exception:
-            pass
+        self.tilemap = TileMap(self.screen, self.scale, self.use_textures, self.settings['level'])
+        # try:
+        #     self.tilemap = TileMap(self.screen, self.scale, self.use_textures, self.settings['level'])
+        # except Exception:
+        #     pass
 
 
     def run(self):

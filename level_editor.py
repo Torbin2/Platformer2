@@ -207,6 +207,7 @@ class LevelEditor:
      
             self.camera = [self.camera[0] + self.movement[0], self.camera[1] + self.movement[1]]
             self.screen.fill("black")
+            pygame.draw.rect(self.screen, ("white"), pygame.Rect((-self.camera[0]) * self.scale,(-self.camera[1]) * self.scale, self.scale * 9, self.scale *19))
 
             self.tilemap.scale = self.block_size / 10 * self.scale
             self.tilemap.scale_images()
@@ -219,6 +220,7 @@ class LevelEditor:
 
             if mouse_press[0] or mouse_press[2]:
                 self.create_tiles(mouse_pos, mouse_press[2])
+
 
             if self.clock.get_fps() < 25:
                 self.mov_multiplier = 10

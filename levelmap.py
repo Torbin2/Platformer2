@@ -292,12 +292,6 @@ class TileMap:
         self.images: dict
         self.scale_images()
 
-    def refresh(self, _scale, _tilemap) -> None :
-        self.level.load(_tilemap)
-
-        self.scale = _scale
-        self.scale_images()
-
 
     def get_tile_factory(self, name: str) -> TileFactory:
         if name.startswith('_'):
