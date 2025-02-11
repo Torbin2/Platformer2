@@ -81,7 +81,7 @@ class Menu:
                              text.get_rect(topleft = (10 * self.scale , len(self.settings) * int(FONT_SIZE *0.67) * self.scale))) 
 
     def apply_setting(self):
-        self.scale = self.settings["window_size"] * 2
+        self.scale = self.settings["window_size"] * 1
         self.screen = pygame.display.set_mode((480 * self.scale, 270* self.scale))
         self.font = pygame.font.Font(pygame.font.get_default_font(), FONT_SIZE* self.scale)
         self.smaller_font = pygame.font.Font(pygame.font.get_default_font(), int(FONT_SIZE / 1.5) * self.scale)
@@ -116,7 +116,7 @@ class Menu:
                         elif self.viewing == 'settings': 
                             match sorted(self.settings)[self.selected] if self.selected < len(self.settings) else "back":
                                 case "window_size": 
-                                    if self.settings["window_size"] >= 4: self.settings["window_size"] = 1 
+                                    if self.settings["window_size"] >= 6: self.settings["window_size"] = 1 
                                     else: self.settings["window_size"] += 1
                                 
                                 case "level": 
