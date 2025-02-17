@@ -6,7 +6,7 @@ from menu import Menu
 pygame.init()
 pygame.display.set_caption('platformer2')
 
-SCREEN_SIZE = (960, 540)
+SCREEN_SIZE = (640, 360)
 
 open_menu = True
 menu = Menu()
@@ -57,7 +57,7 @@ class Game:
             self.player.update(self.tilemap)
             
             #draw
-            self.camera = self.player.update_camera(self.camera)
+            self.camera = self.player.update_camera(self.camera, list(map(lambda x: x/self.scale/2,self.screen.get_size())))
             camera = [round(self.camera[i]) for i in range(2)]
 
             #self.tilemap.render_tiles(camera, self.use_textures)

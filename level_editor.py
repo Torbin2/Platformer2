@@ -8,7 +8,7 @@ OFFSETS = [(0, -1),(0, 1),(-1, 0),(1, 0),(0,0) ]
 CORNER_OFFSETS = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 OPPOSING_CORNER = { "BOTTOMRIGHT": (1,1), "TOPRIGHT" : (1,-1), "BOTTOMLEFT" : (-1, 1), "TOPLEFT" : (-1, -1)}
 
-SCREEN_SIZE = (960, 540)
+SCREEN_SIZE = (640, 360)
 
 class LevelEditor:
     def __init__(self, scale, level_name : str):

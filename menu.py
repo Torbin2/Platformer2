@@ -6,8 +6,8 @@ from os import listdir
 from level_editor import LevelEditor
 
 
-FONT_SIZE = 70
-SCREEN_SIZE = (960, 540)
+FONT_SIZE = 60
+SCREEN_SIZE = (640, 360)
 
 class Menu:
     def __init__(self):
@@ -53,7 +53,7 @@ class Menu:
             else:
                 raise EnvironmentError('No levels to load')
 
-
+        
     def render(self):
         #print(sorted(self.options, key=lambda key: key[1]), sorted(self.options),sorted(self.options, key=lambda key: self.options[key]))
         if self.viewing == 'main':

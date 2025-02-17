@@ -201,24 +201,28 @@ class Player:
         #higher if not pressing a/d, (could remove)
         if self.keys_pressed["a/d"] == True:
             mult = 1
-        else: mult = 10
+        else: mult = 5
 
 
         #higher if grounded
-        if self.state == PlayerState.GROUNDED: num = abs(self.speed[0]) /  20 * mult #makes friction 1/50 * mul from speed
+        if self.state == PlayerState.GROUNDED: num = abs(self.speed[0]) /  20 * mult #makes friction 1/20 * mul from speed
         else: num = abs(self.speed[0]) / 25 * mult
 
         #check if speed is positive
-        try:polarity = (self.speed[0] / abs(self.speed[0]))
+        try:polarity = int(self.speed[0] / abs(self.speed[0]))
         except ZeroDivisionError: polarity = False
 
+        print(num, polarity, self.speed[0]) 
+
         #apply speed based on all of the above
-        if abs(self.speed[0]) - num < 0 or num < 0.01: self.speed[0] = 0
+        if abs(self.speed[0]) - num < 0 or num < 0.01 or abs(self.speed[0]) < 0.02: self.speed[0] = 0
         else: self.speed[0] -= num * polarity
 
-    def update_camera(self, camera):
+        
 
-        delta = [camera[0] - (self.rect.centerx -480), camera[1] - (self.rect.centery - 270)]
+    def update_camera(self, camera, half_screen_size: list[float, float]):
+
+        delta = [camera[0] - int(self.rect.centerx -half_screen_size[0]), camera[1] - int(self.rect.centery - half_screen_size[1])]
         camera[0] -= delta[0] / 10
         camera[1] -= delta[1] / 10
 
