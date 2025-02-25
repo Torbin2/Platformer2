@@ -3,7 +3,13 @@ import json
 
 from os import listdir
 
-from level_editor import LevelEditor
+
+def render_loading_screen(screen: pygame.Surface, font: pygame.font.Font | None, color='#25BEB3'):
+    screen.fill((0, 0, 0))
+    if font is not None:
+        s = font.render('Loading', True, color)
+        screen.blit(s, [screen.get_size()[i] // 2 - s.get_size()[i] // 2 for i in range(2)])
+    pygame.display.update()
 
 
 FONT_SIZE = 60
@@ -109,7 +115,8 @@ class Menu:
                                 case 0:
                                     self.run = False
                                 case 1:
-                                    LevelEditor(self.scale, self.settings["level"]).main()
+                                    from level_editor import LevelEditor
+                                    LevelEditor(self.scale, self.screen, self.settings["level"]).main()
                                 case 2: self.viewing = 'settings'
                                 case 3:
                                     pygame.quit()

@@ -292,7 +292,6 @@ class TileMap:
         self.images: dict
         self.scale_images()
 
-
     def get_tile_factory(self, name: str) -> TileFactory:
         if name.startswith('_'):
             raise ValueError(name)

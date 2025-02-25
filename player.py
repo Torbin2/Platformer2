@@ -83,7 +83,7 @@ class Player:
 
     def die(self) -> None:
         print(f"Player died at {self.rect.x // 10}, {self.rect.y // 10}")
-        print(self.last_checkpoint_pos)
+        # print(self.last_checkpoint_pos)
         self.rect.center = self.last_checkpoint_pos
 
         self.speed = [0.0, 0.0]
@@ -212,7 +212,7 @@ class Player:
         try:polarity = int(self.speed[0] / abs(self.speed[0]))
         except ZeroDivisionError: polarity = False
 
-        print(num, polarity, self.speed[0]) 
+        # print(num, polarity, self.speed[0]) 
 
         #apply speed based on all of the above
         if abs(self.speed[0]) - num < 0 or num < 0.01 or abs(self.speed[0]) < 0.02: self.speed[0] = 0

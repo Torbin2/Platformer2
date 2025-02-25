@@ -3,21 +3,23 @@ import pygame
 
 import levelmap
 from enums import BlockVariants
+from menu import render_loading_screen
 
 OFFSETS = [(0, -1),(0, 1),(-1, 0),(1, 0),(0,0) ]
 CORNER_OFFSETS = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 OPPOSING_CORNER = { "BOTTOMRIGHT": (1,1), "TOPRIGHT" : (1,-1), "BOTTOMLEFT" : (-1, 1), "TOPLEFT" : (-1, -1)}
 
-SCREEN_SIZE = (640, 360)
 
 class LevelEditor:
-    def __init__(self, scale, level_name : str):
+    def __init__(self, scale, screen: pygame.Surface, level_name : str):
         self.scale = scale
 
-        self.screen = pygame.display.set_mode((SCREEN_SIZE[0] * self.scale, SCREEN_SIZE[1]* self.scale))#16 *4: 9 * 4
+        # self.screen = pygame.display.set_mode((480 * self.scale, 270* self.scale))#16 *4: 9 * 4
+        self.screen = screen
         self.camera = [0, 0]
         self.mov_multiplier = 1
 
+        render_loading_screen(self.screen, None)
         self.tilemap = levelmap.TileMap(self.screen, self.scale, True, level_name)
         
         self.selected = {
