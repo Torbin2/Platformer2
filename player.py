@@ -8,11 +8,9 @@ from enums import PlayerState, Events
 OFFSETS = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 0), (0, 1), (1, -1), (1, 0),(1, 1),
            (0, 2), (0,-2)]
 
-
-PhYSICS_MOD = 1
-SPEED_MOD = 1
-
-
+MAX_SPEED = 6
+FRICTION_SPEED = 0.2
+SPEEDS = [0.2, 0.3, 0.4, 0.5, 0.9, 1.4, 2.3, 3.7, 6]
 class Player:
 
     def __init__(self, screen):
@@ -24,7 +22,7 @@ class Player:
         self.mouse_pressed = [False, False, False]
         self.keys_pressed = {"space" : False,
                              "shift": False,
-                             "a/d": False,
+                             "a/d": 0,
                              "r": False}
 
         self.gravity = 1 #1 is down, -1 is up
@@ -41,13 +39,13 @@ class Player:
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_a]:
-            self.speed[0] -= 0.4 * PhYSICS_MOD * SPEED_MOD
-            self.keys_pressed["a/d"] = True
+            self.speed[0] = -1 * SPEEDS[self.keys_pressed["a/d"]]
+            if self.keys_pressed["a/d"] < len(SPEEDS) -1: self.keys_pressed["a/d"] += 1
         elif keys[pygame.K_d]:
-            self.speed[0] += 0.4 * PhYSICS_MOD * SPEED_MOD
-            self.keys_pressed["a/d"] = True
+            self.speed[0] = SPEEDS[self.keys_pressed["a/d"]]
+            if self.keys_pressed["a/d"] < len(SPEEDS) -1: self.keys_pressed["a/d"] += 1
         else:
-            self.keys_pressed["a/d"] = False
+            self.keys_pressed["a/d"] = 0
 
         if keys[pygame.K_SPACE] and self.jumps > 0:
                 
@@ -55,8 +53,8 @@ class Player:
                     self.jumps -= 1
 
                     if self.gravity == 1:
-                        self.speed[1] = -12 * PhYSICS_MOD
-                    else: self.speed[1] = +12 * PhYSICS_MOD
+                        self.speed[1] = -12 
+                    else: self.speed[1] = +12
                 
                 self.keys_pressed["space"] = True 
         else: self.keys_pressed["space"] = False
@@ -134,13 +132,13 @@ class Player:
 
                     if self.speed[0] > 0:
                         self.rect.right = rect.left
-                        self.speed[0] -= 4 * PhYSICS_MOD
+                        self.speed[0] -= 4 
                         if self.speed[0] < 0: self.speed[0] = 0 #in case of direction shift by collision
                         break
 
                     elif self.speed[0] < 0:
                         self.rect.left = rect.right
-                        self.speed[0] += 4 * PhYSICS_MOD
+                        self.speed[0] += 4
                         if self.speed[0] > 0: self.speed[0] = 0#in case of direction shift by collision
                         break
                     else: pass
@@ -152,7 +150,7 @@ class Player:
 
         # gravity,
         if self.speed[1] * self.gravity < 10: #grav is 1/-1
-            self.speed[1] += 0.7 * self.gravity * PhYSICS_MOD
+            self.speed[1] += 0.7 * self.gravity
               
         repeats = ceil(abs(self.speed[1]) / 10) + 1
         stepy = self.speed[1]/ repeats
@@ -198,25 +196,27 @@ class Player:
         else: self.state = PlayerState.AIR
 
     def friction(self):
-        #higher if not pressing a/d, (could remove)
-        if self.keys_pressed["a/d"] == True:
+        NUM = FRICTION_SPEED
+
+        if self.keys_pressed["a/d"] >0:
             mult = 1
-        else: mult = 5
-
-
-        #higher if grounded
-        if self.state == PlayerState.GROUNDED: num = abs(self.speed[0]) /  20 * mult #makes friction 1/20 * mul from speed
-        else: num = abs(self.speed[0]) / 25 * mult
+        else: mult = 3
+        if self.state == PlayerState.GROUNDED: mult *= 1.2
 
         #check if speed is positive
         try:polarity = int(self.speed[0] / abs(self.speed[0]))
-        except ZeroDivisionError: polarity = False
+        except ZeroDivisionError: polarity = 0
+        
+        if abs(self.speed[0]) - NUM *mult < 0: 
+            self.speed[0] = 0
+        else: 
+            self.speed[0] -= NUM * mult * polarity
 
-        # print(num, polarity, self.speed[0]) 
+        print(self.speed[0], mult, polarity)
 
         #apply speed based on all of the above
-        if abs(self.speed[0]) - num < 0 or num < 0.01 or abs(self.speed[0]) < 0.02: self.speed[0] = 0
-        else: self.speed[0] -= num * polarity
+        # if abs(self.speed[0]) - num < 0 or num < 0.01 or abs(self.speed[0]) < 0.02: self.speed[0] = 0
+        # else: self.speed[0] -= num * polarity
 
         
 

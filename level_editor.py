@@ -181,11 +181,6 @@ class LevelEditor:
                     if event.key == pygame.K_ESCAPE: self.quit()
                     if event.key == pygame.K_SPACE: self.camera = [0, 0]
 
-                    # if event.key == pygame.K_t:
-                    #     print('updating block variants')
-                    #     for tile_pos in self.tilemap.level._tiles:
-                    #         self.update_block_variants(tile_pos)
-                    #     print('done')
                     if event.key == pygame.K_e: self.block_size = 10
                     
                     #movement
@@ -211,7 +206,8 @@ class LevelEditor:
      
             self.camera = [self.camera[0] + self.movement[0], self.camera[1] + self.movement[1]]
             self.screen.fill("black")
-            pygame.draw.rect(self.screen, ("white"), pygame.Rect((-self.camera[0]) * self.scale,(-self.camera[1]) * self.scale, self.scale * 9, self.scale *19))
+            pygame.draw.rect(self.screen, ("white"), pygame.Rect((-self.camera[0]) * self.scale,(-self.camera[1]) * self.scale,
+                                                                   self.scale *self.block_size, self.scale *self.block_size*2))
 
             self.tilemap.scale = self.block_size / 10 * self.scale
             self.tilemap.scale_images()
