@@ -107,6 +107,7 @@ class LevelStore:
                 file.write(s)
 
             file.write(self._magic)
+            file.write((0).to_bytes(2, signed=False))  # Revision number
 
             # Informative for progress indicators, does not have to be the same as the actual amount of serialized chunks
             file.write(len(chunks).to_bytes(4, signed=False))
@@ -170,8 +171,11 @@ class LevelStore:
 
         with open(self._level_path, 'rb') as file:
             if file.read(len(self._magic)) != self._magic:
-                raise ValueError(f'File {self._level_path} is not a valid p2l file')
+                raise ValueError(f'File {self._level_path} is not a p2l file')
 
+            revision = int.from_bytes(file.read(2), signed=False)
+            if revision > 0:
+                raise NotImplementedError(f'p2l file revision {revision}')
             info_chunk_amount = int.from_bytes(file.read(4), signed=False)
 
             def read_str() -> str:
