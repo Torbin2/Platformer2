@@ -3,7 +3,16 @@ import pygame
 
 import levelmap
 from enums import BlockVariants
-from menu import render_loading_screen
+from menu import render_loading_screen, render_load_progress_indicator
+
+try:
+    from pygame.gfxdraw import rectangle as _draw_rect
+
+
+    def draw_rect(surface, color, rect):
+        _draw_rect(surface, rect, color)
+except ImportError:
+    from pygame.draw import rect as draw_rect
 
 OFFSETS = [(0, -1),(0, 1),(-1, 0),(1, 0),(0,0) ]
 CORNER_OFFSETS = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
@@ -20,7 +29,8 @@ class LevelEditor:
         self.mov_multiplier = 1
 
         render_loading_screen(self.screen, None)
-        self.tilemap = levelmap.TileMap(self.screen, self.scale, True, level_name)
+        self.tilemap = levelmap.TileMap(self.screen, self.scale, True, level_name,
+                                        load_progress_indicator=render_load_progress_indicator(self.screen))
         
         self.selected = {
             1: 'BLOCK',
@@ -48,7 +58,7 @@ class LevelEditor:
         #self.scale_to_grid = lambda x: [x[0] // (10 * scale), x[1] // (10 * scale)]
 
     def quit(self):
-        self.tilemap.level.save(self.tilemap)
+        self.tilemap.level.save(self.tilemap, load_progress_indicator=self.tilemap.load_progress_indicator)
 
         self.run = False
 
@@ -206,26 +216,34 @@ class LevelEditor:
      
             self.camera = [self.camera[0] + self.movement[0], self.camera[1] + self.movement[1]]
             self.screen.fill("black")
-            pygame.draw.rect(self.screen, ("white"), pygame.Rect((-self.camera[0]) * self.scale,(-self.camera[1]) * self.scale,
-                                                                   self.scale *self.block_size, self.scale *self.block_size*2))
 
             self.tilemap.scale = self.block_size / 10 * self.scale
             self.tilemap.scale_images()
             self.tilemap.render(self.camera)
 
-            mouse_pos = pygame.mouse.get_pos() 
+            draw_rect(self.screen, (255, 255, 255, 10), ((-self.camera[0]) / 10 * self.scale * self.block_size,
+                                                      (-self.camera[1]) / 10 * self.scale * self.block_size,
+                                                      self.scale * self.block_size,
+                                                      self.scale * self.block_size * 2))
+
+            mouse_pos = pygame.mouse.get_pos()
             mouse_press = pygame.mouse.get_pressed()
-            
+
             self.highlight_cursor(mouse_pos)
 
             if mouse_press[0] or mouse_press[2]:
                 self.create_tiles(mouse_pos, mouse_press[2])
 
 
-            if self.clock.get_fps() < 25:
-                self.mov_multiplier = 10
-                print(self.clock.get_fps())
-            else: self.mov_multiplier = 1
-            
+            if (fps := self.clock.get_fps()) < 50:
+                if fps != 0:
+                    self.mov_multiplier = 60 / fps
+                    print('Low fps', self.clock.get_fps())
+                else:
+                    # Assume this means the clock has not measured yet, it could possibly be that the fps is so low it gets measured as 0
+                    self.mov_multiplier = 1
+            else:
+                self.mov_multiplier = 1
+
             self.clock.tick(60)
             pygame.display.update()

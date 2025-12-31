@@ -1,8 +1,10 @@
+import typing
+
 import pygame
 
 from player import Player
 from levelmap import TileMap
-from menu import Menu, render_loading_screen
+from menu import Menu, render_loading_screen, render_load_progress_indicator
 
 pygame.init()
 pygame.display.set_caption('platformer2')
@@ -13,6 +15,12 @@ menu = Menu()
 SCREEN_SIZE = (640, 360)
 
 class Game:
+    tilemap: TileMap
+    settings: typing.Any
+    scale: int
+    screen: pygame.Surface
+    fps: int
+    use_textures: bool
 
     def __init__(self):
         self.clock = pygame.time.Clock()
@@ -20,7 +28,6 @@ class Game:
         self.apply_setting()
 
         self.player = Player(self.screen)
-        self.tilemap = TileMap(self.screen, self.scale, self.use_textures, self.settings['level'])
 
         self.camera = [0, 0]
 
@@ -40,7 +47,8 @@ class Game:
         self.fps = 60 + (60 * self.settings["high_fps"])
         self.use_textures: bool = self.settings["textures"]
 
-        self.tilemap = TileMap(self.screen, self.scale, self.use_textures, self.settings['level'])
+        self.tilemap = TileMap(self.screen, self.scale, self.use_textures, self.settings['level'],
+                               load_progress_indicator=render_load_progress_indicator(self.screen))
         # try:
         #     self.tilemap = TileMap(self.screen, self.scale, self.use_textures, self.settings['level'])
         # except Exception:

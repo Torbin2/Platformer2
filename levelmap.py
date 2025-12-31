@@ -240,7 +240,7 @@ class Images(enum.StrEnum):
 
 
 class TileMap:
-    def __init__(self, screen_: pygame.Surface, scale_: int, use_textures: bool, level_name: str):
+    def __init__(self, screen_: pygame.Surface, scale_: int, use_textures: bool, level_name: str, load_progress_indicator: typing.Callable[[float], None] | None = None):
 
         self.screen = screen_
         self.scale = scale_
@@ -277,7 +277,8 @@ class TileMap:
         self.TileTypes = TileTypes
 
         self.level = p2l.LevelStore(level_name)
-        self.level.load(self)
+        self.load_progress_indicator = load_progress_indicator
+        self.level.load(self, self.load_progress_indicator)
 
         # for rx in range(-5, 10):
         #     self.level.set(rx, 0, self.TileTypes.BLOCK.create(rx, 0))

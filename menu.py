@@ -1,15 +1,34 @@
-import pygame
 import json
+import time
+import typing
+
+import pygame
 
 from os import listdir
 
 
-def render_loading_screen(screen: pygame.Surface, font: pygame.font.Font | None, color='#25BEB3'):
-    screen.fill((0, 0, 0))
+def render_loading_screen(screen: pygame.Surface, font: pygame.font.Font | None, background_color='#041413', color='#25BEB3'):
+    screen.fill(background_color)
     if font is not None:
         s = font.render('Loading', True, color)
         screen.blit(s, [screen.get_size()[i] // 2 - s.get_size()[i] // 2 for i in range(2)])
     pygame.display.update()
+
+_last_render_load_progress_indicator_time = None
+
+def render_load_progress_indicator(screen: pygame.Surface, color='#25BEB3', height_mult: float = 0.1) -> typing.Callable[[float], None]:
+    def _render_load_progress_indicator(progress: float) -> None:
+        global _last_render_load_progress_indicator_time
+        if _last_render_load_progress_indicator_time is None or time.time() - _last_render_load_progress_indicator_time > 0.1:
+            height = screen.get_height() * height_mult
+            y = screen.get_height() - height
+            width = round(screen.get_width() * progress)
+
+            pygame.draw.rect(screen, color, (0, y, width, height))
+            pygame.display.update()
+            _last_render_load_progress_indicator_time = time.time()
+
+    return _render_load_progress_indicator
 
 
 FONT_SIZE = 60

@@ -46,6 +46,7 @@ from __future__ import annotations
 
 import os
 import json
+import time
 import typing
 
 import levelmap
@@ -65,14 +66,18 @@ class LevelStore:
 
         self._chunk_size = 256
 
-    def save(self, tilemap: 'levelmap.TileMap2') -> None:
+    def save(self, tilemap: 'levelmap.TileMap', load_progress_indicator: typing.Callable[[float], None] | None = None) -> None:
+        # TODO: Write level to temporary file and move to the level location (atomic operation)
+
         # dict[tile_params: str::json, index: int]
         tile_to_index: dict[str, int] = {}
         current_index = 1  # The first index is air
 
+        start_time = time.time()
+
         # dict[chunk_pos, dict[chunk_mod_pos, tile_index]]
         chunks: dict[tuple[int, int], dict[tuple[int, int], int]] = {}
-        for x, y in self._tiles:
+        for i, (x, y) in enumerate(self._tiles):
             cx = x // self._chunk_size
             cy = y // self._chunk_size
 
@@ -91,6 +96,9 @@ class LevelStore:
 
             chunks[(cx, cy)][(x % self._chunk_size, y % self._chunk_size)] = index
 
+            if i % 50 == 0 and load_progress_indicator is not None:
+                load_progress_indicator(i / len(self._tiles) / 2)
+
         index_to_tile: dict[int, str] = {v: k for k, v in tile_to_index.items()}
         with open(self._level_path, 'wb') as file:
             def write_str(s: str) -> None:
@@ -100,12 +108,15 @@ class LevelStore:
 
             file.write(self._magic)
 
+            # Informative for progress indicators, does not have to be the same as the actual amount of serialized chunks
+            file.write(len(chunks).to_bytes(4, signed=False))
+
             # TODO: Implement the ability to use more than 2**16 different tiles
             file.write(len(index_to_tile).to_bytes(2))
             for index in index_to_tile:
                 write_str(index_to_tile[index])
 
-            for chunk_pos, chunk in chunks.items():
+            for i, (chunk_pos, chunk) in enumerate(sorted(chunks.items(), key=lambda k: k[0])):
                 file.write(b'\x01')
                 file.write(chunk_pos[0].to_bytes(4, signed=True))
                 file.write(chunk_pos[1].to_bytes(4, signed=True))
@@ -134,7 +145,11 @@ class LevelStore:
                     file.write((1 << 7).to_bytes(1))
                     file.write(length.to_bytes(2))
 
+                load_progress_indicator(i / len(chunks) / 2 + 1)
+
             file.write(b'\x00')  # EOF marker
+
+        print('Saving level took:', time.time() - start_time)
 
     @staticmethod
     def _serialise_tile(tile: 'levelmap.Tile') -> dict[str, str]:
@@ -145,15 +160,19 @@ class LevelStore:
             'collider': tile.collider.serialise()
         }
 
-    def load(self, tilemap: 'levelmap.TileMap2') -> None:
+    def load(self, tilemap: 'levelmap.TileMap2', load_progress_indicator: typing.Callable[[float], None] | None = None) -> None:
         self._tiles = {}
         if not os.path.exists(self._level_path):
             print('Level not found, creating a new, empty level')
             return
 
+        start_time = time.time()
+
         with open(self._level_path, 'rb') as file:
             if file.read(len(self._magic)) != self._magic:
                 raise ValueError(f'File {self._level_path} is not a valid p2l file')
+
+            info_chunk_amount = int.from_bytes(file.read(4), signed=False)
 
             def read_str() -> str:
                 length = int.from_bytes(file.read(4))
@@ -176,6 +195,7 @@ class LevelStore:
                 params = index_to_tile[index]
                 return create_tile_from_params(x, y, params)
 
+            i = 0
             while (marker := file.read(1)) == b'\x01':
                 chunk_x = int.from_bytes(file.read(4), signed=True)
                 chunk_y = int.from_bytes(file.read(4), signed=True)
@@ -230,8 +250,14 @@ class LevelStore:
                 if x != 0 or y != self._chunk_size:
                     raise ValueError(f'The loaded chunk is not the right size (Final x: {x} and y: {y})')
 
+                if load_progress_indicator is not None:
+                    load_progress_indicator(min(i / info_chunk_amount, 1.0))
+                i += 1
+
             if marker != b'\x00':
                 raise ValueError(f'Expected end marker, got {marker}')
+
+        print('Loading level took:', time.time() - start_time)
 
     def get(self, x: int, y: int) -> 'levelmap.Tile' | None:
         if type(x) is not int:
