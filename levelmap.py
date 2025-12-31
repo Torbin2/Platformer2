@@ -298,8 +298,8 @@ class TileMap:
         return getattr(self.TileTypes, name).duplicate()
 
     def render(self, camera_: list[int]):
-        width = int(self.screen.get_width() / 10 // self.scale - 3)
-        height = int(self.screen.get_height() / 10 // self.scale - 1)
+        width = int(self.screen.get_width() / 10 // self.scale)
+        height = int(self.screen.get_height() / 10 // self.scale)
         for sy in range(-self._max_tile_size, height + self._max_tile_size):
             for sx in range(-self._max_tile_size, width + self._max_tile_size):
                 x = sx + round(camera_[0] / 10)
