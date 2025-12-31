@@ -5,15 +5,6 @@ import levelmap
 from enums import BlockVariants
 from menu import render_loading_screen, render_load_progress_indicator
 
-try:
-    from pygame.gfxdraw import rectangle as _draw_rect
-
-
-    def draw_rect(surface, color, rect):
-        _draw_rect(surface, rect, color)
-except ImportError:
-    from pygame.draw import rect as draw_rect
-
 OFFSETS = [(0, -1),(0, 1),(-1, 0),(1, 0),(0,0) ]
 CORNER_OFFSETS = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 OPPOSING_CORNER = { "BOTTOMRIGHT": (1,1), "TOPRIGHT" : (1,-1), "BOTTOMLEFT" : (-1, 1), "TOPLEFT" : (-1, -1)}
@@ -55,6 +46,8 @@ class LevelEditor:
         self.run = True
         self.clock = pygame.time.Clock()
 
+        self.last_place_pos: tuple[int, int] | None = None
+
         #self.scale_to_grid = lambda x: [x[0] // (10 * scale), x[1] // (10 * scale)]
 
     def quit(self):
@@ -62,8 +55,9 @@ class LevelEditor:
 
         self.run = False
 
-    def create_tiles(self, mouse_pos, remove: bool):
-        offset_len = range(int(-0.5 * self.cursor_size), int(0.5 * self.cursor_size + 1))
+    def create_tiles(self, mouse_pos, remove: bool, last_place_pos: tuple[int, int] | None) -> tuple[int, int]:
+        offset_start, offset_end = int(-0.5 * self.cursor_size), int(0.5 * self.cursor_size + 1)
+        offset_len = offset_end - offset_start - 1
 
         # rx = (tx - camera[0]) * tilemap.scale
         # tx = rx / tilemap.scale + camera[0]
@@ -75,13 +69,35 @@ class LevelEditor:
             math.floor((mouse_pos[1] / (self.block_size / 10 * self.scale) + self.camera[1]) / 10)
         )
 
-        for x_offset in offset_len: 
-            for y_offset in offset_len:
-
+        t = self.selected[self.key_press] if self.key_press in self.selected else 'BLOCK'
+        for x_offset in range(offset_start, offset_end):
+            for y_offset in range(offset_start, offset_end):
                 new_block_pos = (block_pos[0] + x_offset, block_pos[1] + y_offset)
-                t = self.selected[self.key_press] if self.key_press in self.selected else 'BLOCK'
-                
                 self.create_tile(new_block_pos, t, remove)
+
+        def sign(x: int) -> int:
+            if x < 0:
+                return -1
+            else:
+                return 1
+
+        if last_place_pos is not None:
+            # t = 'SPIKE'
+
+            dx = block_pos[0] - last_place_pos[0]
+            dy = block_pos[1] - last_place_pos[1]
+            dist = math.sqrt(dx * dx + dy * dy)
+
+            if round(dist) > 0:
+                for d in (d / (round(dist) + 3) for d in range(round(dist) + 3)):
+                    for x_offset in range(offset_start, offset_end):
+                        new_block_pos = (last_place_pos[0] + int(dx * d) + x_offset, last_place_pos[1] + int(dy * d) + sign(dy) * offset_len // 2)
+                        self.create_tile(new_block_pos, t, remove)
+                    for y_offset in range(offset_start, offset_end):
+                        new_block_pos = (last_place_pos[0] + int(dx * d) + sign(dx) * offset_len // 2, last_place_pos[1] + int(dy * d) + y_offset)
+                        self.create_tile(new_block_pos, t, remove)
+
+        return block_pos
 
     def create_tile(self, pos: tuple[int, int], type_name: str, remove: bool):
         if remove:
@@ -206,7 +222,7 @@ class LevelEditor:
                     #movement
                     if event.key in (pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d): self.directions[event.key][2] = False
                     
-                    if not [i for i in self.directions if self.directions[i][2] == True]: 
+                    if not [i for i in self.directions if self.directions[i][2] == True]:
                         self.movement = (0, 0)
                     else: 
                         for i in self.directions:
@@ -221,10 +237,11 @@ class LevelEditor:
             self.tilemap.scale_images()
             self.tilemap.render(self.camera)
 
-            draw_rect(self.screen, (255, 255, 255, 10), ((-self.camera[0]) / 10 * self.scale * self.block_size,
+            # Draw player spawn position
+            pygame.draw.rect(self.screen, (255, 255, 255, 150), ((-self.camera[0]) / 10 * self.scale * self.block_size,
                                                       (-self.camera[1]) / 10 * self.scale * self.block_size,
                                                       self.scale * self.block_size,
-                                                      self.scale * self.block_size * 2))
+                                                      self.scale * self.block_size * 2), 1)
 
             mouse_pos = pygame.mouse.get_pos()
             mouse_press = pygame.mouse.get_pressed()
@@ -232,7 +249,9 @@ class LevelEditor:
             self.highlight_cursor(mouse_pos)
 
             if mouse_press[0] or mouse_press[2]:
-                self.create_tiles(mouse_pos, mouse_press[2])
+                self.last_place_pos = self.create_tiles(mouse_pos, mouse_press[2], self.last_place_pos)
+            else:
+                self.last_place_pos = None
 
 
             if (fps := self.clock.get_fps()) < 50:
