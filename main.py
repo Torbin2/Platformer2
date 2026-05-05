@@ -21,6 +21,7 @@ class Game:
     screen: pygame.Surface
     fps: int
     use_textures: bool
+    render_frame_time_indicator: bool
 
     def __init__(self):
         self.clock = pygame.time.Clock()
@@ -30,6 +31,8 @@ class Game:
         self.player = Player(self.screen)
 
         self.camera = [0, 0]
+
+        self.frame_times = []
 
     def apply_setting(self):
         menu.main(restart = True)
@@ -46,6 +49,7 @@ class Game:
 
         self.fps = 60 + (60 * self.settings["high_fps"])
         self.use_textures: bool = self.settings["textures"]
+        self.render_frame_time_indicator = self.settings['ftime_indicator']
 
         self.player = Player(self.screen)
         self.tilemap = TileMap(self.screen, self.scale, self.use_textures, self.settings['level'],
@@ -79,6 +83,18 @@ class Game:
             self.player.draw(camera, self.scale)
 
             self.clock.tick(self.fps)
+            self.frame_times.append(self.clock.get_rawtime())
+            while len(self.frame_times) > 100 * self.scale:
+                self.frame_times.pop(0)
+            if self.render_frame_time_indicator:
+                pygame.draw.rect(self.screen, (100, 100, 100), (0, self.screen.get_height() - 16 * self.scale, len(self.frame_times), 1))
+                for x, frame_time in enumerate(self.frame_times):
+                    height = frame_time * self.scale
+                    if frame_time >= 16:
+                        c = (255, 0, 0)
+                    else:
+                        c = (0, 255, 0)
+                    pygame.draw.rect(self.screen, c, (x, self.screen.get_height() - height, 1, height))
             pygame.display.update()
 
 

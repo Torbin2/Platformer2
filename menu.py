@@ -43,10 +43,11 @@ class Menu:
         except FileNotFoundError:
             self.settings = {
                 "window_size": 1,
-                "textures" : True,
+                "textures": True,
                 "high_fps": False,
                 "sound": False,
-                "level" : None,
+                "level": None,
+                "ftime_indicator": False,
             }
             with open("settings.json", "w") as f:
                 json.dump(self.settings, f)
@@ -159,6 +160,7 @@ class Menu:
                                 case "textures": self.settings["textures"] = not self.settings["textures"]
                                 case "high_fps": self.settings["high_fps"] = not self.settings["high_fps"]
                                 case "sound": self.settings["sound"] = not self.settings["sound"]
+                                case "ftime_indicator": self.settings["ftime_indicator"] = not self.settings["ftime_indicator"]
 
                                 case "back":
                                     self.viewing = 'main'
