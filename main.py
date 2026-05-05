@@ -42,13 +42,14 @@ class Game:
         else:
             self.screen = menu.screen
 
-        render_loading_screen(self.screen, menu.font)
+        render_loading_screen(self.screen, menu.font, background_color=menu.colors[0], color=menu.colors[1])
 
         self.fps = 60 + (60 * self.settings["high_fps"])
         self.use_textures: bool = self.settings["textures"]
 
+        self.player = Player(self.screen)
         self.tilemap = TileMap(self.screen, self.scale, self.use_textures, self.settings['level'],
-                               load_progress_indicator=render_load_progress_indicator(self.screen))
+                               load_progress_indicator=render_load_progress_indicator(self.screen, color=menu.colors[1]))
         # try:
         #     self.tilemap = TileMap(self.screen, self.scale, self.use_textures, self.settings['level'])
         # except Exception:

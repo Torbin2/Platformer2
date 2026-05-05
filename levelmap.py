@@ -246,7 +246,7 @@ class TileMap:
         self.scale = scale_
         self.use_textures = use_textures
 
-        self._max_tile_size = 1
+        self._max_tile_size = 3
 
         class TileTypes:
             BLOCK = TileFactory(
