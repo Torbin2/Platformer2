@@ -8,6 +8,12 @@ from menu import render_loading_screen, render_load_progress_indicator
 OFFSETS = [(0, -1),(0, 1),(-1, 0),(1, 0),(0,0) ]
 CORNER_OFFSETS = [(-1, -1), (-1, 1), (1, -1), (1, 1)]
 OPPOSING_CORNER = { "BOTTOMRIGHT": (1,1), "TOPRIGHT" : (1,-1), "BOTTOMLEFT" : (-1, 1), "TOPLEFT" : (-1, -1)}
+T_CORNER = {
+    "TOPLEFTRIGHT": ("TOP_T", (-1, -1), (1, -1)),
+    "BOTTOMLEFTRIGHT": ("BOTTOM_T", (-1, 1), (1, 1)),
+    "TOPBOTTOMLEFT": ("LEFT_T", (-1, -1), (-1, 1)),
+    "TOPBOTTOMRIGHT": ("RIGHT_T", (1, -1), (1, 1)),
+}
 
 
 class LevelEditor:
@@ -137,7 +143,11 @@ class LevelEditor:
             amount_around = [tiles_around[x] for x in tiles_around].count(True)
 
             if  amount_around in (0, 1):
-                block_str = "ALL"
+                if tiles_around[(0, -1)]: block_str = "TOP"
+                elif tiles_around[(0, 1)]: block_str = "BOTTOM"
+                elif tiles_around[(-1, 0)]: block_str = "LEFT"
+                elif tiles_around[(1, 0)]: block_str = "RIGHT"
+                else: block_str = "ALL"
 
             elif amount_around == 4:
                 corners = {(-1, -1) : False, (-1, 1): False, (1, -1): False, (1, 1): False}
@@ -155,14 +165,14 @@ class LevelEditor:
                 if not corners[(1, 1)]: block_str += "BOTTOMRIGHT"
 
                 if block_str == "": block_str = "FREE"
-                elif missing in (3, 4) : block_str = "ALL"
-                elif block_str == "TOPLEFTBOTTOMLEFT": block_str = "RIGHT"
-                elif block_str == "TOPRIGHTBOTTOMRIGHT": block_str = "LEFT"
-                elif block_str == "TOPLEFTTOPRIGHT": block_str = "BOTTOM"
-                elif block_str == "BOTTOMLEFTBOTTOMRIGHT": block_str = "TOP"
+                elif missing in (3, 4) : block_str = "PLUS"
+                elif block_str == "TOPLEFTBOTTOMLEFT": block_str = "RIGHT_T_CORNERS"
+                elif block_str == "TOPRIGHTBOTTOMRIGHT": block_str = "LEFT_T_CORNERS"
+                elif block_str == "TOPLEFTTOPRIGHT": block_str = "BOTTOM_T_CORNERS"
+                elif block_str == "BOTTOMLEFTBOTTOMRIGHT": block_str = "TOP_T_CORNERS"
                 else: block_str += "_NO_OPPOSITE_CORNER"
             
-            else: 
+            elif amount_around in (2, 3):
                 
                 if tiles_around[(0, -1)]: block_str += "TOP"
                 if tiles_around[(0, 1)]: block_str += "BOTTOM"
@@ -170,11 +180,36 @@ class LevelEditor:
                 if tiles_around[(-1, 0)]: block_str += "LEFT"
                 if tiles_around[(1, 0)]: block_str += "RIGHT"
 
-                block_str = block_str.removeprefix("TOPBOTTOM").removesuffix("LEFTRIGHT") or block_str
-                
-                if block_str in OPPOSING_CORNER:
-                    if should_connect(block, OPPOSING_CORNER[block_str]):
-                        block_str += "_CORNER"
+                if block_str in T_CORNER:
+                    corners = []
+                    for offset in T_CORNER[block_str][1:]:
+                        if should_connect(block, offset):
+                            if offset == (-1, -1): corners.append("TOPLEFT")
+                            elif offset == (1, -1): corners.append("TOPRIGHT")
+
+                            elif offset == (-1, 1): corners.append("BOTTOMLEFT")
+                            elif offset == (1, 1): corners.append("BOTTOMRIGHT")
+
+                            else: raise AssertionError(offset)
+                    block_str = T_CORNER[block_str][0]
+
+                    if len(corners) == 2:
+                        block_str += '_CORNERS'
+                    elif len(corners) == 1:
+                        corner, = corners
+                        block_str += '_' + corner
+                    else:
+                        assert len(corners) == 0
+
+                else:
+                    block_str = block_str.removeprefix("TOPBOTTOM").removesuffix("LEFTRIGHT") or block_str
+
+                    if block_str in OPPOSING_CORNER:
+                        if should_connect(block, OPPOSING_CORNER[block_str]):
+                            block_str += "_CORNER"
+
+            else:
+                raise AssertionError(amount_around)
                 
             if block_str == "": block_str = "ALL"
 
