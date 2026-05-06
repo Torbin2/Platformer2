@@ -216,7 +216,15 @@ class LevelEditor:
             tile = self.tilemap.level.get(*block)
             if tile is not None:
                 tile.renderer.texture_num = getattr(BlockVariants, block_str)
-    
+
+    def update_all_block_variants(self):
+        render_loading_screen(self.screen, None)
+        progress_indicator = render_load_progress_indicator(self.screen)
+        for i, block_pos in enumerate(self.tilemap.level._tiles):
+            self.update_block_variants(block_pos)
+            if i % 200 == 0:
+                progress_indicator(i / len(self.tilemap.level._tiles))
+
     def pos_to_str(self, pos: tuple[int, int], offset: tuple[int, int] = (0, 0)) -> tuple[int, int]:
         return pos[0] + offset[0], pos[1] + offset[1]
     
@@ -243,6 +251,7 @@ class LevelEditor:
                     if event.key == pygame.K_SPACE: self.camera = [0, 0]
 
                     if event.key == pygame.K_e: self.block_size = 10
+                    if event.key == pygame.K_r: self.update_all_block_variants()
                     
                     #movement
                     if event.key in (pygame.K_w, pygame.K_a, pygame.K_s, pygame.K_d):
