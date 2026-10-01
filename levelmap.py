@@ -7,6 +7,7 @@ import typing
 import pygame
 import collections
 
+import background
 import p2l
 from enums import Events
 from load_images import load_image, load_images
@@ -296,12 +297,16 @@ class TileMap:
         self.images: dict
         self.scale_images()
 
+        self.background = background.Background(self.screen.get_size(), 0.05, self.scale, color=(120, 110, 100))
+
     def get_tile_factory(self, name: str) -> TileFactory:
         if name.startswith('_'):
             raise ValueError(name)
         return getattr(self.TileTypes, name).duplicate()
 
     def render(self, camera_: list[int]):
+        self.background.render(self.screen, (-camera_[0] * self.scale, -camera_[1] * self.scale), 4)
+
         width = int(self.screen.get_width() / 10 // self.scale)
         height = int(self.screen.get_height() / 10 // self.scale)
         for sy in range(-self._max_tile_size, height + self._max_tile_size):
