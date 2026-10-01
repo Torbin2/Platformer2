@@ -154,6 +154,9 @@ class SpikeBlock(Tile):
 
 
 class CheckPoint(Tile):
+    DEFAULT_COLOR = [78, 24, 139]
+    ACTIVATED_COLOR = [26, 155, 26]
+
     @classmethod
     def on_collision(cls, other: pygame.Rect):
         return True, Events.GET_CHECKPOINT
@@ -257,13 +260,13 @@ class TileMap:
             )
             SPIKE = TileFactory(
                 renderer_type=SolidBlockRenderer,
-                renderer_kwargs={'image_name': 'SPIKE_BLOCK'},
+                renderer_kwargs={'image_name': 'SPIKE_BLOCK', 'color': [251, 242, 54]},
                 collider_type=BlockCollider,
                 tile_type=SpikeBlock
             )
             CHECKPOINT = TileFactory(
                 renderer_type=SolidBlockRenderer,
-                renderer_kwargs={'image_name': 'CHECKPOINT', "texture_num" : 0 },
+                renderer_kwargs={'image_name': 'CHECKPOINT', "texture_num" : 0, 'color': CheckPoint.DEFAULT_COLOR},
                 collider_type=BlockCollider,
                 collider_kwargs={"size": (30, 30)},
                 tile_type=CheckPoint

@@ -87,10 +87,10 @@ class Game:
             while len(self.frame_times) > 100 * self.scale:
                 self.frame_times.pop(0)
             if self.render_frame_time_indicator:
-                pygame.draw.rect(self.screen, (100, 100, 100), (0, self.screen.get_height() - 16 * self.scale, len(self.frame_times), 1))
+                pygame.draw.rect(self.screen, (100, 100, 100), (0, self.screen.get_height() - (1000 / self.fps) * self.scale, len(self.frame_times), 1))
                 for x, frame_time in enumerate(self.frame_times):
                     height = frame_time * self.scale
-                    if frame_time >= 16:
+                    if frame_time >= 1000 / self.fps:
                         c = (255, 0, 0)
                     else:
                         c = (0, 255, 0)

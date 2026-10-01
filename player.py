@@ -106,11 +106,13 @@ class Player:
                     if not isinstance(self._last_checkpoint.renderer, levelmap.SolidBlockRenderer):
                         raise ValueError()
                     self._last_checkpoint.renderer.texture_num = 0
+                    self._last_checkpoint.renderer._color = self._last_checkpoint.DEFAULT_COLOR
 
                 self._last_checkpoint = tilemap.level.get(rect.x // 10, rect.y // 10)
                 if not isinstance(self._last_checkpoint.renderer, levelmap.SolidBlockRenderer):
                     raise ValueError()
                 self._last_checkpoint.renderer.texture_num = 1
+                self._last_checkpoint.renderer._color = self._last_checkpoint.ACTIVATED_COLOR
 
             case _:
                 raise NotImplementedError(events)
