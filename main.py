@@ -1,3 +1,4 @@
+import time
 import typing
 
 import pygame
@@ -52,8 +53,9 @@ class Game:
         self.render_frame_time_indicator = self.settings['ftime_indicator']
 
         self.player = Player(self.screen)
-        self.tilemap = TileMap(self.screen, self.scale, self.use_textures, self.settings['level'],
-                               load_progress_indicator=render_load_progress_indicator(self.screen, color=menu.colors[1]))
+        self.tilemap = TileMap(self.screen, self.scale, self.use_textures, self.settings['level'], False,
+                               load_progress_indicator=render_load_progress_indicator(self.screen, color=menu.colors[1]),
+                               render_frame_time_indicator=self.render_frame_time_indicator)
         # try:
         #     self.tilemap = TileMap(self.screen, self.scale, self.use_textures, self.settings['level'])
         # except Exception:
@@ -83,19 +85,27 @@ class Game:
             self.player.draw(camera, self.scale)
 
             self.clock.tick(self.fps)
-            self.frame_times.append(self.clock.get_rawtime())
+            rawtime = self.clock.get_rawtime()
+            # print(rawtime)
+            self.frame_times.append(rawtime)
             while len(self.frame_times) > 100 * self.scale:
                 self.frame_times.pop(0)
             if self.render_frame_time_indicator:
-                pygame.draw.rect(self.screen, (100, 100, 100), (0, self.screen.get_height() - (1000 / self.fps) * self.scale, len(self.frame_times), 1))
+                dt = round(1000 / self.fps)
+                pygame.draw.rect(self.screen, (100, 100, 100), (0, self.screen.get_height() - dt * self.scale, len(self.frame_times), 1))
                 for x, frame_time in enumerate(self.frame_times):
                     height = frame_time * self.scale
-                    if frame_time >= 1000 / self.fps:
+                    if frame_time > dt:
                         c = (255, 0, 0)
+                    elif frame_time == dt:
+                        c = (200, 200, 0)
                     else:
                         c = (0, 255, 0)
                     pygame.draw.rect(self.screen, c, (x, self.screen.get_height() - height, 1, height))
+
+            t = time.time()
             pygame.display.update()
+            self.tilemap.render_perf_ms((0, 0, 255), ((time.time() - t) * 1000))
 
 
 Game().run()

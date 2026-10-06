@@ -26,7 +26,7 @@ class LevelEditor:
         self.mov_multiplier = 1
 
         render_loading_screen(self.screen, None)
-        self.tilemap = levelmap.TileMap(self.screen, self.scale, True, level_name,
+        self.tilemap = levelmap.TileMap(self.screen, self.scale, True, level_name, False,
                                         load_progress_indicator=render_load_progress_indicator(self.screen))
         
         self.selected = {

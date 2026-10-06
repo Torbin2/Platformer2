@@ -2,15 +2,18 @@ from __future__ import annotations
 
 import abc # 💀
 import enum
+import time
 import typing
 
 import pygame
+import pygame.gfxdraw
 import collections
 
 import background
 import p2l
 from enums import Events
 from load_images import load_image, load_images
+import renderer
 
 
 class Collider(abc.ABC):
@@ -33,12 +36,17 @@ class Renderer(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def render(self, screen: pygame.Surface, camera: list[int], tilemap: TileMap) -> None:  # TODO: It would be better if the texture renderer was another class  # What and why?
+    def render(self, screen: pygame.Surface, camera: list[int], tilemap: TileMap) -> None:
         pass
 
     def serialise(self) -> dict[str, typing.Any]:
         """Return the **kwargs that can be used to create an object like this one."""
         return {}
+
+    def static_texture(self, tilemap: TileMap) -> tuple[pygame.Surface, str] | None:
+        """Returns the texture name (and index) if the texture doesn't change during gameplay.
+        Not called in the level editor"""
+        return None
 
 
 class TileFactory:
@@ -131,7 +139,7 @@ class Tile(abc.ABC):
         pass
 
     def render(self, screen: pygame.Surface, camera: list[int], tilemap: TileMap) -> None:
-        self.renderer.render(screen, camera, tilemap)
+        return self.renderer.render(screen, camera, tilemap)
 
     def serialise(self) -> dict[str, typing.Any]:
         """Return the **kwargs that, in combination with the right collider and renderer, can be used to create an object like this one"""
@@ -233,7 +241,15 @@ class SolidBlockRenderer(Renderer):
 
 
 class ConnectedSolidBlockRenderer(SolidBlockRenderer):
-    pass
+    def static_texture(self, tilemap: TileMap) -> tuple[pygame.Surface, str] | None:
+        textures = tilemap.images[getattr(Images, self._image_name)]
+        if type(textures) is list:
+            texture = textures[self.texture_num]
+            name = f'{self._image_name} {self.texture_num}'
+        else:
+            texture = textures
+            name = self._image_name
+        return texture, name
 
 
 class Images(enum.StrEnum):
@@ -244,11 +260,21 @@ class Images(enum.StrEnum):
 
 
 class TileMap:
-    def __init__(self, screen_: pygame.Surface, scale_: int, use_textures: bool, level_name: str, load_progress_indicator: typing.Callable[[float], None] | None = None):
+    def __init__(self,
+                 screen_: pygame.Surface,
+                 scale_: int,
+                 use_textures: bool,
+                 level_name: str,
+                 use_static_textures: bool,
+                 load_progress_indicator: typing.Callable[[float], None] | None = None,
+                 render_frame_time_indicator: bool = False
+        ):
 
         self.screen = screen_
         self.scale = scale_
         self.use_textures = use_textures
+        self.use_static_textures = use_static_textures
+        self.render_frame_time_indicator = render_frame_time_indicator
 
         self._max_tile_size = 3
 
@@ -284,9 +310,7 @@ class TileMap:
         self.load_progress_indicator = load_progress_indicator
         self.level.load(self, self.load_progress_indicator)
 
-        # for rx in range(-5, 10):
-        #     self.level.set(rx, 0, self.TileTypes.BLOCK.create(rx, 0))
-        # self.level.save(self)
+        self.renderer = renderer.LevelMapRenderer(self.level, 16)
 
         self._images = {
             Images.SNAKE: load_image("snake.png"),
@@ -299,26 +323,45 @@ class TileMap:
 
         self.background = background.Background(self.screen.get_size(), 0.05, self.scale, color=(120, 110, 100))
 
+        self._perf: list[tuple[tuple[int, int, int], float]] = []
+
     def get_tile_factory(self, name: str) -> TileFactory:
         if name.startswith('_'):
             raise ValueError(name)
         return getattr(self.TileTypes, name).duplicate()
 
     def render(self, camera_: list[int]):
+        t = time.time() * 1000.0
         self.background.render(self.screen, (-camera_[0] * self.scale, -camera_[1] * self.scale), 4)
+        self.render_perf_ms((255, 0, 0), time.time() * 1000.0 - t)
 
-        width = int(self.screen.get_width() / 10 // self.scale)
-        height = int(self.screen.get_height() / 10 // self.scale)
-        for sy in range(-self._max_tile_size, height + self._max_tile_size):
-            for sx in range(-self._max_tile_size, width + self._max_tile_size):
-                x = sx + round(camera_[0] / 10)
-                y = sy + round(camera_[1] / 10)
+        t = time.time() * 1000.0
+        if not self.use_static_textures or not self.use_textures:
+            width = int(self.screen.get_width() / 10 // self.scale)
+            height = int(self.screen.get_height() / 10 // self.scale)
+            for sy in range(-self._max_tile_size, height + self._max_tile_size):
+                for sx in range(-self._max_tile_size, width + self._max_tile_size):
+                    x = sx + round(camera_[0] / 10)
+                    y = sy + round(camera_[1] / 10)
 
-                tile = self.level.get(x, y)
-                if tile is None:
-                    continue
+                    tile = self.level.get(x, y)
+                    if tile is None:
+                        continue
 
-                tile.render(self.screen, camera_, self)
+                    tile.render(self.screen, camera_, self)
+        else:
+            self.renderer.render(self.screen, self, camera_)
+        self.render_perf_ms((0, 255, 0), time.time() * 1000.0 - t)
+
+        if self.render_frame_time_indicator:
+            x = 0.0
+            perf_scale = 10
+            for color, time_ms in self._perf:
+                width = time_ms * self.scale * perf_scale
+                pygame.draw.rect(self.screen, color, (x, 0, width, self.scale * perf_scale))
+                x += width
+            self._perf = []
+
 
     def collide(self, player: pygame.Rect) -> list[tuple[Collider, Events | None]]:
         out = []
@@ -339,3 +382,10 @@ class TileMap:
                 self.images[key] = [pygame.transform.scale(image, (size(image), size(image))) for image in self._images[key]]
             else:
                 self.images[key] = pygame.transform.scale(self._images[key], (size(self._images[key]), size(self._images[key])))
+
+    @property
+    def max_tile_size(self):
+        return self._max_tile_size
+
+    def render_perf_ms(self, color: tuple[int, int, int], time_ms: float):
+        self._perf.append((color, time_ms))

@@ -6,9 +6,14 @@ BASE_IMG_PATH = 'assets/'
 
 def load_image(path):
     # print(BASE_IMG_PATH + path)
-    img = pygame.image.load(BASE_IMG_PATH + path).convert_alpha()
+    img = pygame.image.load(BASE_IMG_PATH + path)
+
+    # Transfer colorkey to per-pixel alpha because colorkey with pygame.gfxdraw.textured_polygon is really slow
+    s = pygame.Surface(img.get_size(), pygame.SRCALPHA)
     img.set_colorkey((0, 0, 0))
-    return img
+    s.blit(img, (0, 0))
+
+    return s
 
 def load_images(path):
     images = []
