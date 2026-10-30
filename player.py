@@ -1,4 +1,5 @@
 from math import ceil
+import math
 
 import pygame
 
@@ -16,7 +17,7 @@ class Player:
 
     def __init__(self, screen):
 
-        self.rect = pygame.Rect(0, 0, 9, 19)
+        self.rect = pygame.FRect(0, 0, 9, 19)
         self.speed = [0, 0]
         self.screen = screen
 
@@ -33,7 +34,7 @@ class Player:
         self.jumps = self.default_values["jumps"]
         self.flips = self.default_values["flips"]
 
-        self.last_checkpoint_pos: tuple[int, int] = self.rect.center
+        self.last_checkpoint_pos: tuple[float, float] = self.rect.center
         self._last_checkpoint: levelmap.Tile | None = None
 
     def input(self):
@@ -127,7 +128,7 @@ class Player:
 
             self.rect.centerx += stepx
 
-            for collider, events in tilemap.collide(self.rect):
+            for collider, events in tilemap.collide(pygame.Rect(self.rect)):
                 if events is None:
                     if not isinstance(collider, levelmap.BlockCollider):
                         raise NotImplementedError()
@@ -173,7 +174,7 @@ class Player:
                     if (self.speed[1] > 0 and self.gravity == 1) or (self.speed[1] < 0 and self.gravity == -1):
                         ground_touch = True
 
-            for collider, events in tilemap.collide(self.rect):
+            for collider, events in tilemap.collide(pygame.Rect(self.rect)):
                 if events is None:
                     if not isinstance(collider, levelmap.BlockCollider):
                         raise NotImplementedError()
@@ -228,9 +229,9 @@ class Player:
             self.speed[0] -= num * polarity
 
     def update_camera(self, camera, half_screen_size: list[float, float]):
+        delta = [camera[0] - (self.rect.centerx - half_screen_size[0]),
+                 camera[1] - (self.rect.centery - half_screen_size[1])]
 
-        delta = [camera[0] - int(self.rect.centerx - half_screen_size[0]),
-                 camera[1] - int(self.rect.centery - half_screen_size[1])]
         camera[0] -= delta[0] / 10
         camera[1] -= delta[1] / 10
 

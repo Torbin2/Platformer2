@@ -53,7 +53,7 @@ class Game:
         self.render_frame_time_indicator = self.settings['ftime_indicator']
 
         self.player = Player(self.screen)
-        self.tilemap = TileMap(self.screen, self.scale, self.use_textures, self.settings['level'], False,
+        self.tilemap = TileMap(self.screen, self.scale, self.use_textures, self.settings['level'], True,
                                load_progress_indicator=render_load_progress_indicator(self.screen, color=menu.colors[1]),
                                render_frame_time_indicator=self.render_frame_time_indicator)
         # try:
