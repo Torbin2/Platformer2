@@ -42,9 +42,18 @@ class Game:
         self.scale = self.settings["window_size"]
         new_size = (SCREEN_SIZE[0] * self.scale, SCREEN_SIZE[1] * self.scale)
         if new_size != menu.screen.get_size():
-            self.screen = pygame.display.set_mode(new_size) #16:9 ratio
+            try:
+                self.screen = pygame.display.set_mode(new_size, pygame.DOUBLEBUF)
+            except pygame.error:
+                self.screen = pygame.display.set_mode(new_size)
         else:
             self.screen = menu.screen
+
+        info = pygame.display.Info()
+        if info.hw:
+            print('Using hardware rendering')
+        else:
+            print('Using software rendering')
 
         render_loading_screen(self.screen, menu.font, background_color=menu.colors[0], color=menu.colors[1])
 

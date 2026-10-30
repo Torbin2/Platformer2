@@ -54,7 +54,11 @@ class Menu:
         
         self.scale = self.settings["window_size"]
 
-        self.screen = pygame.display.set_mode((SCREEN_SIZE[0] * self.scale, SCREEN_SIZE[1]* self.scale))#16 *4: 9 * 4  
+        size = (SCREEN_SIZE[0] * self.scale, SCREEN_SIZE[1] * self.scale)  #16 *4: 9 * 4
+        try:
+            self.screen = pygame.display.set_mode(size, pygame.DOUBLEBUF)
+        except pygame.error:
+            self.screen = pygame.display.set_mode(size)
         self.clock = pygame.time.Clock()
         
         self.font = pygame.font.Font(pygame.font.get_default_font(), FONT_SIZE* self.scale)
@@ -150,7 +154,7 @@ class Menu:
                         elif self.viewing == 'settings': 
                             match sorted(self.settings)[self.selected] if self.selected < len(self.settings) else "back":
                                 case "window_size": 
-                                    if self.settings["window_size"] >= 4: self.settings["window_size"] = 1 
+                                    if self.settings["window_size"] >= 5: self.settings["window_size"] = 1
                                     else: self.settings["window_size"] += 1
                                 
                                 case "level": 
